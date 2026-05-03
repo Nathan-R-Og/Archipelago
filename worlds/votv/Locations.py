@@ -1,16 +1,14 @@
 # Look at init or Items.py for more information on imports
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import logging
 
-from .Types import LocData
+from .Types import LocData, VOTVGoal
+from .Constants import allowed_unlocks
+from .data.item_data import shop_items
+from .data.location_data import locations
 
 if TYPE_CHECKING:
     from . import VOTVWorld
-
-# This is technique in programming to make things more readable for booleans
-# A boolean is true or false
-def did_include_extra_locations(world: "VOTVWorld") -> bool:
-    return bool(world.options.ExtraLocations)
 
 # This is used by ap and in Items.py
 # Theres a multitude of reasons to need to grab how many locations there are
@@ -18,55 +16,108 @@ def get_total_locations(world: "VOTVWorld") -> int:
     # This is the total that we'll keep updating as we count how many locations there are
     total = 0
     for name in location_table:
-        # If we did not turn on extra locations (see how readable it is with that thing from the top)
-        # AND the name of it is found in our extra locations table, then that means we dont want to count it
-        # So continue moves onto the next name in the table
-        if not did_include_extra_locations(world) and name in extra_locations:
-            continue
-
         # If the location is valid though, count it
         if is_valid_location(world, name):
             total += 1
 
     return total
 
-def get_location_names() -> Dict[str, int]:
+def get_location_names() -> dict[str, int]:
     # This is just a fancy way of getting all the names and data in the location table and making a dictionary thats {name, code}
     # If you have dynamic locations then you want to add them to the dictionary as well
     names = {name: data.ap_code for name, data in location_table.items()}
-
     return names
+
+def is_goal_enabled(world: "VOTVWorld", goal: VOTVGoal):
+    return (world.options.objective == goal
+        or goal == VOTVGoal.KERFUR_OMEGA and world.options.kerfur_omega_enabled.value
+        or goal == VOTVGoal.HELL_ROCK and world.options.hell_rock_enabled.value
+        or goal == VOTVGoal.LAMBERT_PLUSH and world.options.lambert_plush_enabled.value
+        or goal == VOTVGoal.GREEN_CABINET and world.options.green_cabinet_enabled.value)
 
 # The check to make sure the location is valid
 # I know it looks like the same as when we counted it but thats because this is an example
 # Things get complicated fast so having a back up is nice
-def is_valid_location(world: "VOTVWorld", name) -> bool:
-    if not did_include_extra_locations(world) and name in extra_locations:
+def is_valid_location(world: "VOTVWorld", name: str) -> bool:
+    if name.startswith("Purchase") and not world.options.shop_items.value:
+        return False
+    
+    if name.endswith("Argemia Plush"):
+        has_argemia_plush_objective = world.options.objective in (VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH)
+        if name.startswith("Red") or name.startswith("Green") or name.startswith("Blue"):
+            return world.options.argemia_plushes.value > 0 or has_argemia_plush_objective
+
+        if name.startswith("Yellow") or name.startswith("Cyan") or name.startswith("Magenta"):
+            return world.options.argemia_plushes.value > 1 or has_argemia_plush_objective
+        
+        if name.startswith("Nuclear"):
+            return world.options.argemia_plushes.value > 2
+        
+    if name.startswith("Survive Day"):
+        max_day = world.options.survive_days_locations
+        return int(name.split(" ")[-1]) <= max_day
+        
+    if name.startswith("Send Level"):
+        count = world.options.signal_locations
+        return int(name.split(" ")[-1]) <= count
+        
+    if name.startswith("Daily Task Done"):
+        count = world.options.daily_task_locations
+        return int(name.split(" ")[-1]) <= count
+        
+    if name.startswith("Repair Server"):
+        count = world.options.server_repair_locations
+        return int(name.split(" ")[-1]) <= count
+        
+    if name.startswith("Repair Transformer"):
+        count = world.options.transformer_repair_locations
+        return int(name.split(" ")[-1]) <= count
+        
+    if name.startswith("Sell 10 Full Trash Bags"):
+        count = world.options.trash_bags_locations
+        return int(name.split(" ")[-1]) <= count
+
+    if name not in locations:
+        return True
+    location_info = locations[name]
+
+    if len(location_info.goals) > 0:
+        if location_info.is_final and world.options.objective not in location_info.goals:
+            return False
+
+        if not any(is_goal_enabled(world, goal) for goal in location_info.goals):
+            return False
+
+    if location_info.is_funny and not world.options.funny_setting.value:
+        return False
+
+    if location_info.is_time_sensitive and not world.options.time_sensitive.value:
+        return False
+
+    if (
+        not world.options.buried_items.value
+        and world.options.objective not in location_info.goals
+        and location_info.is_buried
+    ):
+        return False
+
+    if location_info.radioactive_capsule_craft_required and not world.options.require_mining.value:
         return False
 
     return True
 
-votv_locations = {}
+votv_locations: dict[str, LocData] = {}
 
-current_id = len(votv_locations)
-max_days = 50
-last_day_report = True
-for day in range(max_days):
-    votv_locations[f"Survived Day {day+1}"] = LocData(current_id, "World")
-    current_id += 1
-    if day == 0:
-        continue
-    if day+1 < max_days or last_day_report:
-        votv_locations[f"Day {day+1} Report"] = LocData(current_id, "World")
-        current_id += 1
-
-allowed_unlocks = []
-from .data.item_data import shop_items
+current_id = len(votv_locations) + 1
 for item_name in shop_items.keys():
     item = shop_items[item_name]
     if not item.checkUnlock(allowed_unlocks):
         continue
     votv_locations[f"Purchase {item_name}"] = LocData(current_id, "World")
+    current_id += 1
+
+for name, info in locations.items():
+    votv_locations[name] = LocData(current_id, "World")
     current_id += 1
 
 # from .data.achievement_data import *
@@ -77,13 +128,8 @@ for item_name in shop_items.keys():
 #     votv_locations[advancement] = LocData(current_id, "World")
 #     current_id += 1
 
-extra_locations = {
-    #"ml7's house": LocData(187, "Sibiu"),
-}
-
 # Like in Items.py, breaking up the different locations to help with organization and if something special needs to happen to them
-event_locations = {
-}
+event_locations: dict[str, LocData] = {}
 
 # Also like in Items.py, this collects all the dictionaries together
 # Its important to note that locations MUST be bigger than progressive item count and should be bigger than total item count
@@ -91,6 +137,5 @@ event_locations = {
 # But important to note
 location_table = {
     **votv_locations,
-    **extra_locations,
     **event_locations
 }

@@ -25,12 +25,12 @@ ITEM_OFFSET = 0
 # Adding = x at the end adds a default to it so if you dont include it, it'll default to whatever you put after it
 class ItemData(NamedTuple):
     base_code: Optional[int]
-    classification: ItemClassification
-    count: Optional[int] = 1
+    classification: dict[ItemClassification, int]
+
     @property
     def ap_code(self):
         #ADD OFFSET
-        return self.base_code + BASE_ID + ITEM_OFFSET
+        return (self.base_code or 0) + BASE_ID + ITEM_OFFSET
 
 # LOCATION ID OFFSET FOR GAME
 LOC_OFFSET = 1000
@@ -40,7 +40,17 @@ LOC_OFFSET = 1000
 class LocData(NamedTuple):
     base_code: Optional[int]
     region: Optional[str]
+
     @property
     def ap_code(self):
         #ADD OFFSET
-        return self.base_code + BASE_ID + LOC_OFFSET
+        return (self.base_code or 0) + BASE_ID + LOC_OFFSET
+
+class VOTVGoal(IntEnum):
+    KERFUR_OMEGA = 0
+    HELL_ROCK = 1
+    WHITE_ARGEMIA_PLUSH = 2
+    BLACK_ARGEMIA_PLUSH = 3
+    LAMBERT_PLUSH = 4
+    GREEN_CABINET = 5
+    SURVIVE = 6

@@ -1,7 +1,8 @@
 from BaseClasses import Region
+from typing import TYPE_CHECKING
+
 from .Types import VOTVLocation
 from .Locations import location_table, is_valid_location
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from . import VOTVWorld

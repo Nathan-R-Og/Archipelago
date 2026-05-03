@@ -1,26 +1,26 @@
 from typing import TYPE_CHECKING
-from worlds.generic.Rules import add_rule
+from rule_builder.rules import Has
+
+from .Locations import is_valid_location, location_table
+from .data.location_data import locations
 
 if TYPE_CHECKING:
     from . import VOTVWorld
 
 def set_rules(world: "VOTVWorld"):
     player = world.player
-    options = world.options
-    max_days = 50
-    for i in range(max_days+1):
-        if i == 0:
+
+    for name in location_table:
+        if not is_valid_location(world, name):
             continue
-        print(f"Survived Day {i}")
-        print(i)
-        add_rule(world.multiworld.get_location(f"Survived Day {i}", player),
-                lambda state: state.has("Day", player, i))
-        if i < 1 or i >= max_days:
+
+        if name not in locations:
             continue
-        print(f"Day {i+1} Report")
-        print(i)
-        add_rule(world.multiworld.get_location(f"Day {i+1} Report", player),
-                lambda state: state.has("Day", player, i))
+        location_info = locations[name]
+        if location_info.rule is None:
+            continue
+
+        world.set_rule(world.multiworld.get_location(name, player), location_info.rule)
 
     # Victory condition rule!
-    world.multiworld.completion_condition[player] = lambda state: state.has("Victory", player)
+    world.set_completion_rule(Has("Victory"))

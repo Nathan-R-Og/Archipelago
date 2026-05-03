@@ -17,10 +17,11 @@ from worlds.AutoWorld import World, CollectionState, WebWorld
 from typing import Dict
 
 from .Locations import get_location_names, get_total_locations
-from .Items import create_item, create_itempool, item_table
-from .Options import VOTVOptions
+from .Items import create_items, create_itempool, item_table
+from .Options import VOTVOptions, votv_option_groups
 from .Regions import create_regions
 from .Rules import set_rules
+from .data.location_data import locations
 
 # This is where you setup the page on the site!
 # Typically is the name of your game with web
@@ -28,6 +29,8 @@ from .Rules import set_rules
 class VOTVWeb(WebWorld):
     # Theres a few different themes so have fun with it
     theme = "stone"
+
+    options_groups = votv_option_groups
 
     # You shouldnt have to change much here except the name at the bottom!
     tutorials = [Tutorial(
@@ -59,7 +62,7 @@ class VOTVWorld(World):
     location_name_to_id = get_location_names()
     # And these 2 are the name of your Options.py class.
     options_dataclass = VOTVOptions
-    options = VOTVOptions
+    options: VOTVOptions  # type: ignore
     # The name of the class above
     web = VOTVWeb()
 
@@ -109,30 +112,33 @@ class VOTVWorld(World):
     # ahit does similar if you want another look and bomb rush cyberfunk does it in a slightly different way by turning it into a specific item for that game
     # Again hopefully I do a better job of explaining the Items.py file
     def create_item(self, name: str) -> Item:
-        return create_item(self, name)
+        return create_items(self, name)[0]
+    
+    def get_filler_item_name(self) -> str:
+        return "Bonus Points"
 
     # The slot data is what youre sending to the AP server kinda. You dont have to add all your options. Really you want the ones you think a pop tracker would use
     # Seed, Slot, and TotalLocations are all super important for AP though, you need those
     def fill_slot_data(self) -> Dict[str, object]:
         slot_data: Dict[str, object] = {
             "options": {
-                "StartingChapter":          self.options.StartingChapter.value,
-                "ExtraLocations":           self.options.ExtraLocations.value,
-                "PartyShuffle":             self.options.PartyShuffle.value,
-                "StartingCharacter":        self.options.StartingCharacter.value,
-                "StartWithTeleport":        self.options.StartWithTeleport.value,
-                "NoTrainTrainpath":         self.options.NoTrainTrainpath.value,
-                "ExpModifier":              self.options.ExpModifier.value,
-                "TrapChance":               self.options.TrapChance.value,
-                "StoneOriginTrapWeight":    self.options.StoneOriginTrapWeight.value,
-                "PoisnNeedleTrapWeight":    self.options.PoisnNeedleTrapWeight.value
+                "Objective":                self.options.objective.value,
+                "BuriedOrCraftedCapsule":   self.options.require_mining.value,
+                "SurviveDay":               self.options.survive_day.value,
+                "ChickenSandwiches":        self.options.chicken_sandwiches.value,
+                "BuriedItems":              self.options.buried_items.value,
+                "ArgemiaPlushes":           self.options.argemia_plushes.value,
+                "TrapChance":               self.options.trap_chance.value
             },
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
-            "TotalLocations": get_total_locations(self) # get_total_locations(self) comes from Locations.py
+            "TotalLocations": get_total_locations(self)  # get_total_locations(self) comes from Locations.py
         }
 
         return slot_data
+    
+    def extend_hint_information(self, hint_data: Dict[int, Dict[int, str]]):
+        hint_data[self.player] = {self.location_name_to_id[k]: v.hint for k,v in locations.items() if len(v.hint)}
 
     # These are used by AP to add and remove items from the player. You can probably just leave them alone
     def collect(self, state: "CollectionState", item: "Item") -> bool:

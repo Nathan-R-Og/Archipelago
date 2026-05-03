@@ -3,6 +3,17 @@ from dataclasses import dataclass
 from worlds.AutoWorld import PerGameCommonOptions
 from Options import Choice, OptionGroup, Toggle, Range
 
+from .Types import VOTVGoal
+from .Constants import (
+    max_days,
+    max_signal_locations,
+    max_daily_tasks_locations,
+    max_fuse_replacement_locations,
+    max_server_repair_locations,
+    max_transformer_repair_locations,
+    max_trash_cleaning_locations
+)
+
 # If youve ever gone to an options page and seen how sometimes options are grouped
 # This is that
 def create_option_groups() -> List[OptionGroup]:
@@ -12,82 +23,195 @@ def create_option_groups() -> List[OptionGroup]:
 
     return option_group_list
 
-class StartingChapter(Choice):
+class Objective(Choice):
     """
-    Determines which chapter you'll start with.
-    When you grab choice you'll get the associated number.
-    IE: If the player chooses the sewer then when you go to call StartingChapter you'll get 3
-    When displaying the options names on the site, _ will become spaces and the word option will go away.
+    Determines what is the objective of the run.
     """
-    display_name = "Starting Chapter"
-    option_green_hill_zone = 1
-    option_romania = 2
-    option_the_sewer = 3
+    display_name = "Objective"
+    option_kerfur_omega = int(VOTVGoal.KERFUR_OMEGA)
+    option_hell_rock = int(VOTVGoal.HELL_ROCK.value)
+    option_white_argemia_plush = int(VOTVGoal.WHITE_ARGEMIA_PLUSH)
+    option_black_argemia_plush = int(VOTVGoal.BLACK_ARGEMIA_PLUSH)
+    option_lambert_plush = int(VOTVGoal.LAMBERT_PLUSH)
+    option_green_cabinet = int(VOTVGoal.GREEN_CABINET)
+    option_survive = int(VOTVGoal.SURVIVE)
+    default = int(VOTVGoal.KERFUR_OMEGA)
+
+class RequireMining(Toggle):
+    """
+    Determines if the Radioactive Capsule can be dug out or needs to be crafted.
+    """
+    display_name = "Require Mining for the Radioactive Capsule"
+    default = 0
+
+class SurviveDay(Range):
+    """
+    Determines the day you need to survive to if the objective is Survive.
+    """
+    display_name = "Survive Day"
+    range_start = 1
+    range_end = 50
+    default = 50
+
+class DayAsItems(Toggle):
+    """
+    Determines if you need to unlock days as items.
+    """
+    display_name = "Day As Items"
+    default = 0
+
+class ScrapRecipesAsItems(Toggle):
+    """
+    Determines if you need to unlock scrap recipes as items.
+    """
+    display_name = "Scrap Recipes As Items"
+    default = 0
+
+class SurviveDayLocations(Range):
+    """
+    Determines the maximum day to create "Survive Day N" location for. 0 will generate none.
+    """
+    display_name = "Survive Day Locations"
+    range_start = 0
+    range_end = max_days
+    default = 5
+
+class SignalLocations(Range):
+    """
+    Determines the number of "Sell Level N Signal" locations to create, one for each signal level.
+    """
+    display_name = "Signal Locations"
+    range_start = 0
+    range_end = max_signal_locations
+    default = 5
+
+class DailyTaskLocations(Range):
+    """
+    Determines the number of "Daily Task Done" locations to create.
+    """
+    display_name = "Daily Task Locations"
+    range_start = 0
+    range_end = max_daily_tasks_locations
+    default = 5
+
+class FuseReplacementLocations(Range):
+    """
+    Determines the number of "Replace Fuse" locations to create.
+    """
+    display_name = "Replace Fuse Locations"
+    range_start = 0
+    range_end = max_fuse_replacement_locations
+    default = 5
+
+class ServerRepairLocations(Range):
+    """
+    Determines the number of "Repair Server" locations to create.
+    """
+    display_name = "Repair Server Locations"
+    range_start = 0
+    range_end = max_server_repair_locations
+    default = 5
+
+class TransformerRepairLocations(Range):
+    """
+    Determines the number of "Repair Transformer" locations to create.
+    """
+    display_name = "Repair Transformer Locations"
+    range_start = 0
+    range_end = max_transformer_repair_locations
+    default = 5
+
+class TrashBagsLocations(Range):
+    """
+    Determines the number of "Sell 10 Full Trash Bags" locations to create.
+    """
+    display_name = "Trash Bags Locations"
+    range_start = 0
+    range_end = max_trash_cleaning_locations
+    default = 5
+
+class ShopItems(Toggle):
+    """
+    Determines if purchasing shop items are checks.
+    """
+    display_name = "Shop Items As Locations"
+    default = 0
+
+class ChickenSandwiches(Toggle):
+    """
+    Determines if the chicken sandwiches are included as locations.
+    """
+    display_name = "Chicken Sandwiches As Locations"
     default = 1
 
-class PartyShuffle(Choice):
+class BuriedItems(Toggle):
     """
-    Determines if characters will be in the item pool.
-    Off: Characters will be in their vanilla locations.
-    All but Ninten: You will start with Ninten, and all other characters will be randomized.
-    All: You will start with a random character, and all other characters will be randomized.
-    Excludes Flying Man and EVE due to them being area based.
+    Determines if items that require digging out are included as locations.
+    Locations required by the objective are always enabled (Example: the ball joints for Kerfur-Omega)
     """
-    display_name = "Party Shuffle"
-    option_off = 1
-    option_all_but_ninten = 2
+    display_name = "Buried Items As Locations"
+    default = 1
+
+class TimeSensitive(Toggle):
+    """
+    Determines if locations that are in-game-time-sensitive are enabled.
+    """
+    display_name = "Time Sensitive Locations"
+    default = 0
+
+class FunnySetting(Toggle):
+    """
+    Determines if items that require the "funny setting" are included as locations and items.
+    """
+    display_name = "Funny Setting"
+    default = 0
+
+class ArgemiaPlushes(Choice):
+    """
+    Determines what argemia plushes are present as locations.
+    None: No Argemia plushes
+    RGB: Only the Red, Green, and Blue Argemia plushes
+    RGBYCM: All the Argemia plushes except the nuclear ones (adds an item to get the "lifecrystal" signal)
+    All: All the Argemia plushes
+    """
+    display_name = "Argemia Plushes As Locations"
+    option_none = 0
+    option_rgb = 1
+    option_rgbycm = 2
     option_all = 3
     default = 1
 
-class StartingCharacter(Choice):
+class KerfurOmegaEnabled(Toggle):
     """
-    Determines what character you will start with.
-    Only relevant if you have Party Shuffle enabled.
+    Determines if Kerfur-Omega locations and items should be enabled, even if it's not the objective.
+    Does not include the final location.
     """
-    display_name = "Starting Character"
-    option_ninten = 1
-    option_ana = 2
-    option_lloyd = 3
-    option_teddy = 4
-    option_pippi = 5
+    display_name = "Kerfur-Omega Items and Locations Enabled"
     default = 1
 
-class StartWithTeleport(Toggle):
+class HellRockEnabled(Toggle):
     """
-    Determines if you start with the "Teleport" PSI ability.
-    Helps if you don't want to BK immediately.
+    Determines if Hell Rock locations and items should be enabled, even if it's not the objective.
+    Does not include the final location.
     """
-    display_name = "Start With Teleport"
+    display_name = "Hell Rock Items and Locations Enabled"
     default = 1
 
-class ExtraLocations(Toggle):
+class LambertPlushEnabled(Toggle):
     """
-    This will enable the extra locations option. Toggle is just true or false.
+    Determines if Lambert Plush locations and items should be enabled, even if it's not the objective.
+    Does not include the final location.
     """
-    display_name = "Add Extra Locations"
-
-
-class NoTrainTrainpath(Toggle):
-    """
-    Whether or not traversing the entire Merrysville - Reindeer train path by foot
-    is in logic or not.
-    Defaults to false for your sanity.
-    """
-    display_name = "Include Trainpath Trek"
+    display_name = "Lambert Plush Items and Locations Enabled"
     default = 0
 
-class ExpModifier(Range):
+class GreenCabinetEnabled(Toggle):
     """
-    Modifies the game's level curves.
-    The higher the number, the less levels you will get per exp. (inversely proportional)
-
-    150 is value used by Teddy and Pippi, which is good for default.
-    -1 can be used to turn off this setting.
+    Determines if Green Cabinet locations and items should be enabled, even if it's not the objective.
+    Does not include the final location.
     """
-    display_name = "Exp Modifier"
-    range_start = -1
-    range_end = 255
-    default = 150
+    display_name = "Green Cabinet Items and Locations Enabled"
+    default = 1
 
 class TrapChance(Range):
     """
@@ -100,44 +224,61 @@ class TrapChance(Range):
     range_end = 100
     default = 0
 
-class StoneOriginTrapWeight(Range):
-    """
-    The weight of StoneOrigin traps in the trap pool.
-    If recieved, instantly Petrifies a party member.
-    """
-    display_name = "StoneOrigin Trap Weight"
-    range_start = 0
-    range_end = 100
-    default = 20
-
-class PoisnNeedleTrapWeight(Range):
-    """
-    The weight of PoisnNeedle traps in the trap pool.
-    If recieved, instantly Poisons a party member.
-    """
-    display_name = "PoisnNeedle Trap Weight"
-    range_start = 0
-    range_end = 100
-    default = 20
-
 @dataclass
 class VOTVOptions(PerGameCommonOptions):
-    StartingChapter:            StartingChapter
-    ExtraLocations:             ExtraLocations
-    PartyShuffle:               PartyShuffle
-    StartingCharacter:          StartingCharacter
-    StartWithTeleport:          StartWithTeleport
-    NoTrainTrainpath:           NoTrainTrainpath
-    ExpModifier:                ExpModifier
-    TrapChance:                 TrapChance
-    StoneOriginTrapWeight:      StoneOriginTrapWeight
-    PoisnNeedleTrapWeight:      PoisnNeedleTrapWeight
+    objective:                  Objective
+    require_mining:             RequireMining
+    survive_day:                SurviveDay
+    day_as_items:               DayAsItems
+    scrap_recipes_as_items:     ScrapRecipesAsItems
+    survive_days_locations:     SurviveDayLocations
+    signal_locations:           SignalLocations
+    daily_task_locations:       DailyTaskLocations
+    fuse_replacement_locations: FuseReplacementLocations
+    server_repair_locations:    ServerRepairLocations
+    transformer_repair_locations: TransformerRepairLocations
+    trash_bags_locations:       TrashBagsLocations
+    shop_items:                 ShopItems
+    chicken_sandwiches:         ChickenSandwiches
+    buried_items:               BuriedItems
+    time_sensitive:             TimeSensitive
+    funny_setting:              FunnySetting
+    argemia_plushes:            ArgemiaPlushes
+    kerfur_omega_enabled:       KerfurOmegaEnabled
+    hell_rock_enabled:          HellRockEnabled
+    lambert_plush_enabled:      LambertPlushEnabled
+    green_cabinet_enabled:      GreenCabinetEnabled
+    trap_chance:                TrapChance
+
 
 # This is where you organize your options
 # Its entirely up to you how you want to organize it
 votv_option_groups: Dict[str, List[Any]] = {
-    "General Options": [StartingChapter, ExtraLocations, NoTrainTrainpath,
-                        PartyShuffle, StartingCharacter, StartWithTeleport,
-                        ExpModifier],
-    "Trap Options": [TrapChance, StoneOriginTrapWeight, PoisnNeedleTrapWeight]
+    "General Options": [
+        Objective,
+        RequireMining,
+        SurviveDay
+    ],
+    "Item & Locations Options": [
+        DayAsItems,
+        ScrapRecipesAsItems,
+        SurviveDayLocations,
+        SignalLocations,
+        DailyTaskLocations,
+        FuseReplacementLocations,
+        ServerRepairLocations,
+        TransformerRepairLocations,
+        TrashBagsLocations,
+        ShopItems,
+        ChickenSandwiches,
+        BuriedItems,
+        TimeSensitive,
+        FunnySetting,
+        ArgemiaPlushes,
+        KerfurOmegaEnabled,
+        HellRockEnabled,
+        LambertPlushEnabled,
+        GreenCabinetEnabled,
+        TrapChance
+    ]
 }
