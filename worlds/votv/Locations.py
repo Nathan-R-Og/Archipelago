@@ -41,7 +41,7 @@ def is_goal_enabled(world: "VOTVWorld", goal: VOTVGoal):
 def is_valid_location(world: "VOTVWorld", name: str) -> bool:
     if name.startswith("Purchase") and not world.options.shop_items.value:
         return False
-    
+
     if name.endswith("Argemia Plush"):
         has_argemia_plush_objective = world.options.objective in (VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH)
         if name.startswith("Red") or name.startswith("Green") or name.startswith("Blue"):
@@ -49,30 +49,34 @@ def is_valid_location(world: "VOTVWorld", name: str) -> bool:
 
         if name.startswith("Yellow") or name.startswith("Cyan") or name.startswith("Magenta"):
             return world.options.argemia_plushes.value > 1 or has_argemia_plush_objective
-        
+
         if name.startswith("Nuclear"):
             return world.options.argemia_plushes.value > 2
-        
+
     if name.startswith("Survive Day"):
-        max_day = world.options.survive_days_locations
+        max_day = world.options.survive_day if world.options.objective == VOTVGoal.SURVIVE else world.options.survive_days_locations
         return int(name.split(" ")[-1]) <= max_day
-        
-    if name.startswith("Send Level"):
+
+    if name.startswith("Sell Level"):
         count = world.options.signal_locations
         return int(name.split(" ")[-1]) <= count
-        
+
     if name.startswith("Daily Task Done"):
         count = world.options.daily_task_locations
         return int(name.split(" ")[-1]) <= count
-        
+
     if name.startswith("Repair Server"):
         count = world.options.server_repair_locations
         return int(name.split(" ")[-1]) <= count
-        
+
     if name.startswith("Repair Transformer"):
         count = world.options.transformer_repair_locations
         return int(name.split(" ")[-1]) <= count
-        
+
+    if name.startswith("Replace Fuse"):
+        count = world.options.fuse_replacement_locations
+        return int(name.split(" ")[-1]) <= count
+
     if name.startswith("Sell 10 Full Trash Bags"):
         count = world.options.trash_bags_locations
         return int(name.split(" ")[-1]) <= count

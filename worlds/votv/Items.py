@@ -13,6 +13,8 @@ import logging
 from BaseClasses import Item, ItemClassification
 from typing import TYPE_CHECKING, Sequence
 
+from worlds.votv.Options import UpgradesAsItems
+
 # These come from the other files in this example. If you want to see the source ctrl + click the name
 # You can also do that ctrl + click for any functions to see what they do
 from .Types import ItemData, VOTVGoal, VOTVItem
@@ -29,20 +31,51 @@ class ItemValidity(IntEnum):
     VALID = 1
     PROGRESSION = 2
 
-def is_valid_item(world: "VOTVWorld", name: str, classsfication: int) -> ItemClassification | None:
+def is_valid_item(world: "VOTVWorld", name: str, classification: int) -> ItemClassification | None:
     if name == "Day" and not world.options.day_as_items.value:
+        return None
+    
+    if (
+        classification & ExtraClassification.upgrade
+        and not (
+            world.options.upgrades_as_items.value == UpgradesAsItems.option_all
+            or world.options.upgrades_as_items.value == UpgradesAsItems.option_useful and (
+                classification & ItemClassification.progression or classification & ItemClassification.useful
+            )
+        )
+    ):
+        return None
+    
+    if name.startswith("Physical Module") and not world.options.physical_modules_as_items:
+        return None
+    
+    if (
+        name == "Lifecrystal Signal"
+        and not (
+            world.options.argemia_plushes >= world.options.argemia_plushes.option_rgbycm
+            or world.options.objective in (VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH)
+            or world.options.buried_items.value and world.options.hell_rock_enabled
+            or world.options.objective == VOTVGoal.HELL_ROCK
+        )
+    ):
         return None
     
     if name.endswith("Argemia Plush"):
         has_argemia_plush_objective = world.options.objective in (VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH)
         if not has_argemia_plush_objective:
-            if name.startswith("Red") or name.startswith("Green") or name.startswith("Blue") and world.options.argemia_plushes.value == 0:
+            if (
+                name.startswith("Red") or name.startswith("Green") or name.startswith("Blue")
+                and world.options.argemia_plushes.value < world.options.argemia_plushes.option_rgb
+            ):
                 return None
 
-            if name.startswith("Yellow") or name.startswith("Cyan") or name.startswith("Magenta") and world.options.argemia_plushes.value <= 1:
+            if (
+                name.startswith("Yellow") or name.startswith("Cyan") or name.startswith("Magenta")
+                and world.options.argemia_plushes.value < world.options.argemia_plushes.option_rgbycm
+            ):
                 return None
         
-        if name.startswith("Nuclear") and world.options.argemia_plushes.value <= 2:
+        if name.startswith("Nuclear") and world.options.argemia_plushes.value < world.options.argemia_plushes.option_all:
             return None
         
     if name.endswith("Recipe") and not world.options.scrap_recipes_as_items:
@@ -71,16 +104,16 @@ def is_valid_item(world: "VOTVWorld", name: str, classsfication: int) -> ItemCla
         itemd = extra_items[name]
 
     if itemd:
-        if classsfication & ExtraClassification.buried and not world.options.buried_items.value:
+        if classification & ExtraClassification.buried and not world.options.buried_items.value:
             return None
 
-        if classsfication & ExtraClassification.time_sensitive and not world.options.time_sensitive.value:
+        if classification & ExtraClassification.time_sensitive and not world.options.time_sensitive.value:
             return None
 
-        if classsfication & ExtraClassification.funny and not world.options.funny_setting.value:
+        if classification & ExtraClassification.funny and not world.options.funny_setting.value:
             return None
 
-    return ItemClassification(classsfication & 0b11111)
+    return ItemClassification(classification & 0b11111)
 
 # If you're curious about the -> list[Item] that is a syntax to make sure you return the correct variable type
 # In this instance we're saying we only want to return a list of items

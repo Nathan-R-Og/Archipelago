@@ -18,7 +18,7 @@ from typing import Dict
 
 from .Locations import get_location_names, get_total_locations
 from .Items import create_items, create_itempool, item_table
-from .Options import VOTVOptions, votv_option_groups
+from .Options import VOTVOptions, create_option_groups
 from .Regions import create_regions
 from .Rules import set_rules
 from .data.location_data import locations
@@ -30,7 +30,7 @@ class VOTVWeb(WebWorld):
     # Theres a few different themes so have fun with it
     theme = "stone"
 
-    options_groups = votv_option_groups
+    option_groups = create_option_groups()
 
     # You shouldnt have to change much here except the name at the bottom!
     tutorials = [Tutorial(
@@ -113,7 +113,7 @@ class VOTVWorld(World):
     # Again hopefully I do a better job of explaining the Items.py file
     def create_item(self, name: str) -> Item:
         return create_items(self, name)[0]
-    
+
     def get_filler_item_name(self) -> str:
         return "Bonus Points"
 
@@ -122,13 +122,32 @@ class VOTVWorld(World):
     def fill_slot_data(self) -> Dict[str, object]:
         slot_data: Dict[str, object] = {
             "options": {
-                "Objective":                self.options.objective.value,
-                "BuriedOrCraftedCapsule":   self.options.require_mining.value,
-                "SurviveDay":               self.options.survive_day.value,
-                "ChickenSandwiches":        self.options.chicken_sandwiches.value,
-                "BuriedItems":              self.options.buried_items.value,
-                "ArgemiaPlushes":           self.options.argemia_plushes.value,
-                "TrapChance":               self.options.trap_chance.value
+                "ScrapRecipesAsItems":          self.options.scrap_recipes_as_items.value,
+                "UpgradesAsItems":              self.options.upgrades_as_items.value,
+                "PhysicalModulesAsItems":       self.options.physical_modules_as_items.value,
+                "BonusPointsAmount":            self.options.bonus_points_amount.value,
+                "SurviveDayLocations":          self.options.survive_days_locations.value,
+                "SignalLocations":              self.options.signal_locations.value,
+                "DailyTaskLocations":           self.options.daily_task_locations.value,
+                "FuseReplacementLocations":     self.options.fuse_replacement_locations.value,
+                "ServerRepairLocations":        self.options.server_repair_locations.value,
+                "TransformerRepairLocations":   self.options.transformer_repair_locations.value,
+                "TrashBagsLocations":           self.options.trash_bags_locations.value,
+                "ShopItems":                    self.options.shop_items.value,
+                "TimeSensitive":                self.options.time_sensitive.value,
+                "FunnySetting":                 self.options.funny_setting.value,
+                "KerfurOmegaEnabled":           self.options.kerfur_omega_enabled.value,
+                "HellRockEnabled":              self.options.hell_rock_enabled.value,
+                "LambertPlushEnabled":          self.options.lambert_plush_enabled.value,
+                "GreenCabinetEnabled":          self.options.green_cabinet_enabled.value,
+                "Objective":                    self.options.objective.value,
+                "BuriedOrCraftedCapsule":       self.options.require_mining.value,
+                "DayAsItems":                   self.options.day_as_items.value,
+                "SurviveDay":                   self.options.survive_day.value,
+                "ChickenSandwiches":            self.options.chicken_sandwiches.value,
+                "BuriedItems":                  self.options.buried_items.value,
+                "ArgemiaPlushes":               self.options.argemia_plushes.value,
+                "TrapChance":                   self.options.trap_chance.value
             },
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
@@ -136,7 +155,7 @@ class VOTVWorld(World):
         }
 
         return slot_data
-    
+
     def extend_hint_information(self, hint_data: Dict[int, Dict[int, str]]):
         hint_data[self.player] = {self.location_name_to_id[k]: v.hint for k,v in locations.items() if len(v.hint)}
 

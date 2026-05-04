@@ -3,7 +3,7 @@ from typing import NamedTuple
 from rule_builder.options import OptionFilter
 from rule_builder.rules import Has, HasAll, HasAllCounts, HasAny, Rule
 
-from ..Options import DayAsItems, RequireMining, ScrapRecipesAsItems
+from ..Options import DayAsItems, RequireMining, ScrapRecipesAsItems, UpgradesAsItems
 from ..Types import VOTVGoal
 from ..Constants import (
     max_days,
@@ -101,8 +101,8 @@ locations = {
     "Pickaxe":                          LocationInfo("At the Lake", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, rule=Has("Scuba Gear")),
     "Omega AI Module":                  LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, rule=Has("Scuba Gear")),
 
-    "Buried Capsule":                   LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, is_buried=True, rule=Has("Shovel") & OptionFilter(RequireMining, 0)),
-    "Crafted Capsule":                  LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, rule=HasAll("Hazmat Suit", "Gas Welder", "Radioactive Capsule Blueprint") & HasAny("Pickaxe", "Hacksaw") & OptionFilter(RequireMining, 1)),
+    "Buried Capsule":                   LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, is_buried=True, rule=Has("Shovel") & OptionFilter(RequireMining, False)),
+    "Crafted Capsule":                  LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, rule=HasAll("Hazmat Suit", "Gas Welder", "Radioactive Capsule Blueprint") & HasAny("Pickaxe", "Hacksaw") & OptionFilter(RequireMining, True)),
 
     "Basement Skull":                   LocationInfo("", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}),
     "Buried Box Skull":                 LocationInfo("At 263.25/-7.25", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, rule=Has("Shovel")),
@@ -110,7 +110,7 @@ locations = {
     "Radioactive Capsule Skull":        LocationInfo("", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}),
     "Cave Entrance Skull":              LocationInfo("", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}),
     "Stonehenge Skull":                 LocationInfo("", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}),
-    "Rozital Capsule Skull":            LocationInfo("", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, rule=Has("Lifecrystal Signal") & Has("Progressive Processing Level", 3) & Has("Shovel")),
+    "Rozital Capsule Skull":            LocationInfo("", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, rule=Has("Lifecrystal Signal") & Has("Progressive Processing Level", 3, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True) & Has("Shovel")),
 
     "Earth Tablet":                     LocationInfo("Within the New Trees area", ["Lambert Plush"], goals={VOTVGoal.LAMBERT_PLUSH}, is_buried=True, rule=Has("Shovel")),
     "Water Tablet":                     LocationInfo("In the Lake, beneath the tree", ["Lambert Plush"], goals={VOTVGoal.LAMBERT_PLUSH}, is_buried=True, rule=Has("Shovel") & Has("Scuba Gear")),
@@ -145,8 +145,8 @@ locations = {
     "Eriewell":                         LocationInfo("Type eriewell in a console, then listen for the music", ["Funny setting"], is_funny=True),
     "Maid Outfit":                      LocationInfo("Buried near the last turn to TR3", ["Funny setting"], is_funny=True, is_buried=True, rule=HasAll("Shovel", "Metal Detector")),
 
-    **{f"Survive Day {i+1}":            LocationInfo("", ["Tasks"], rule=Has("Day", i, options=[OptionFilter(DayAsItems, 1)], filtered_resolution=True)) for i in range(max_days)},
-    **{f"Sell Level {j} Signal {i+1}":  LocationInfo("", ["Tasks"], rule=Has("Progressive Processing Level", j)) for i in range(max_signal_locations) for j in range(4)},
+    **{f"Survive Day {i+1}":            LocationInfo("", ["Tasks"], rule=Has("Day", i, options=[OptionFilter(DayAsItems, True)], filtered_resolution=True)) for i in range(max_days)},
+    **{f"Sell Level {j} Signal {i+1}":  LocationInfo("", ["Tasks"], rule=Has("Progressive Processing Level", j, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True)) for j in range(4) for i in range(max_signal_locations)},
     **{f"Daily Task Done {i+1}":        LocationInfo("", ["Tasks"]) for i in range(max_daily_tasks_locations)},
     **{f"Repair Server {i+1}":          LocationInfo("", ["Tasks"]) for i in range(max_server_repair_locations)},
     **{f"Repair Transformer {i+1}":     LocationInfo("", ["Tasks"]) for i in range(max_transformer_repair_locations)},
@@ -155,7 +155,7 @@ locations = {
 
     "Kerfur-Omega":                     LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, is_final=True, rule=(
         HasAllCounts({"Kerfur": 2, "Radioactive Capsule": 1, "Omega AI Module": 1, "Limb Joint": 4, "Ball Joint": 6, "Progressive Camera": 3, "Kerfur-Omega Complete Manual": 1})
-        & HasAll(*(f"{x} Scrap Recipe" for x in ("Plastic", "Metal", "Glass", "Electronic")), options=[OptionFilter(ScrapRecipesAsItems, 1)], filtered_resolution=True)
+        & HasAll(*(f"{x} Scrap Recipe" for x in ("Plastic", "Metal", "Glass", "Electronic")), options=[OptionFilter(ScrapRecipesAsItems, True)], filtered_resolution=True)
     )),
     "Hell Rock":                        LocationInfo("", ["Misc"], goals={VOTVGoal.HELL_ROCK}, is_final=True, rule=HasAllCounts({"Skull": 7})),
     "White Argemia Plush":              LocationInfo("", ["Plushes"], goals={VOTVGoal.WHITE_ARGEMIA_PLUSH}, is_final=True, rule=HasAllCounts({"Red Argemia Plush": 1, "Green Argemia Plush": 1, "Blue Argemia Plush": 1, "Yellow Argemia Plush": 1, "Cyan Argemia Plush": 1, "Magenta Argemia Plush": 1})),
