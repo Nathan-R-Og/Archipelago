@@ -1,7 +1,7 @@
-from typing import List, Dict, Any
+from typing import List, Dict
 from dataclasses import dataclass
 from worlds.AutoWorld import PerGameCommonOptions
-from Options import Choice, DefaultOnToggle, NumericOption, OptionGroup, Range
+from Options import Choice, DefaultOnToggle, Option, OptionGroup, Range
 from worlds.ladx.Options import DefaultOffToggle
 
 from .Types import VOTVGoal
@@ -89,6 +89,12 @@ class PhysicalModulesAsItems(DefaultOnToggle):
     Determines if physical modules will be created as items.
     """
     display_name = "Physical Modules As Items"
+
+class OnlyBonusPoints(DefaultOffToggle):
+    """
+    Determines if filler items will only be Bonus Points.
+    """
+    display_name = "Only Bonus Points"
 
 class BonusPointsAmount(Range):
     """
@@ -263,6 +269,7 @@ class VOTVOptions(PerGameCommonOptions):
     scrap_recipes_as_items:         ScrapRecipesAsItems
     upgrades_as_items:              UpgradesAsItems
     physical_modules_as_items:      PhysicalModulesAsItems
+    only_bonus_points:              OnlyBonusPoints
     bonus_points_amount:            BonusPointsAmount
     survive_days_locations:         SurviveDayLocations
     signal_locations:               SignalLocations
@@ -286,8 +293,8 @@ class VOTVOptions(PerGameCommonOptions):
 
 # This is where you organize your options
 # Its entirely up to you how you want to organize it
-votv_option_groups: Dict[str, List[Any]] = {
-    "General Options": [
+votv_option_groups: Dict[str, List[type[Option]]] = {
+    "Game Options": [
         Objective,
         RequireMining,
         SurviveDay
@@ -297,6 +304,7 @@ votv_option_groups: Dict[str, List[Any]] = {
         ScrapRecipesAsItems,
         UpgradesAsItems,
         PhysicalModulesAsItems,
+        OnlyBonusPoints,
         BonusPointsAmount,
         SurviveDayLocations,
         SignalLocations,

@@ -190,19 +190,20 @@ def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
     trap_list: list[str] = []
 
     # This grabs all the junk items and trap items
-    for name, item in item_table.items():
-        if name == "Bonus Points":  # Special filler item used when there's not enough items
-            continue
-
-        for classification, amount in item.classification.items():
-            classification = is_valid_item(world, name, classification)
-            if classification is None:
+    if not world.options.only_bonus_points:
+        for name, item in item_table.items():
+            if name == "Bonus Points":  # Special filler item used when there's not enough items
                 continue
 
-            if classification == ItemClassification.filler:
-                junk_list += (name for _ in range(amount))
-            elif classification == ItemClassification.trap:
-                trap_list += (name for _ in range(amount))
+            for classification, amount in item.classification.items():
+                classification = is_valid_item(world, name, classification)
+                if classification is None:
+                    continue
+
+                if classification == ItemClassification.filler:
+                    junk_list += (name for _ in range(amount))
+                elif classification == ItemClassification.trap:
+                    trap_list += (name for _ in range(amount))
 
     # Where all the magic happens of adding the junk and traps randomly
     # AP does all the weight management so we just need to worry about how many are created
