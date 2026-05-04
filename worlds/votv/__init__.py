@@ -66,6 +66,8 @@ class VOTVWorld(World):
     # The name of the class above
     web = VOTVWeb()
 
+    item_pool: list[Item]
+
     origin_region_name: str = "World"
 
     # There are other built in variables for AP. You can look at other worlds to see your options
@@ -103,7 +105,8 @@ class VOTVWorld(World):
     # The important part is that the items get into the self.multiworld.itempool as a list of Items
     # Ill try to explain better in the Items.py file
     def create_items(self):
-        self.multiworld.itempool += create_itempool(self)
+        self.item_pool = create_itempool(self)
+        self.multiworld.itempool += self.item_pool
 
     def set_rules(self):
         set_rules(self)
@@ -151,6 +154,7 @@ class VOTVWorld(World):
             },
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
+            "ItemNames": [x.name for i,x in enumerate(self.item_pool) if self.item_pool.index(x) == i],  # unique names of all the items in our pool
             "TotalLocations": get_total_locations(self)  # get_total_locations(self) comes from Locations.py
         }
 
