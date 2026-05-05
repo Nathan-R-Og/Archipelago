@@ -83,6 +83,7 @@ class UpgradesAsItems(Choice):
     """Only useful and progression upgrade items"""
     option_all = 2
     """All upgrade items"""
+    default = 1
 
 class PhysicalModulesAsItems(DefaultOnToggle):
     """
@@ -176,9 +177,21 @@ class TrashBagsLocations(Range):
     range_end = max_trash_cleaning_locations
     default = 5
 
+class MaintenanceTasks(DefaultOffToggle):
+    """
+    Determines if maintenance advancements are locations.
+    """
+    display_name = "Maintenance Tasks As Locations"
+
+class CookingTasks(DefaultOffToggle):
+    """
+    Determines if cooking advancements are locations.
+    """
+    display_name = "Cooking Tasks As Locations"
+
 class ShopItems(DefaultOffToggle):
     """
-    Determines if purchasing shop items are checks.
+    Determines if purchasing shop items are locations.
     """
     display_name = "Shop Items As Locations"
 
@@ -278,6 +291,8 @@ class VOTVOptions(PerGameCommonOptions):
     server_repair_locations:        ServerRepairLocations
     transformer_repair_locations:   TransformerRepairLocations
     trash_bags_locations:           TrashBagsLocations
+    maintenance_tasks:              MaintenanceTasks
+    cooking_tasks:                  CookingTasks
     shop_items:                     ShopItems
     chicken_sandwiches:             ChickenSandwiches
     buried_items:                   BuriedItems
@@ -299,7 +314,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         RequireMining,
         SurviveDay
     ],
-    "Item & Locations Options": [
+    "Item & Location Options": [
         DayAsItems,
         ScrapRecipesAsItems,
         UpgradesAsItems,
@@ -313,6 +328,8 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         ServerRepairLocations,
         TransformerRepairLocations,
         TrashBagsLocations,
+        MaintenanceTasks,
+        CookingTasks,
         ShopItems,
         ChickenSandwiches,
         BuriedItems,

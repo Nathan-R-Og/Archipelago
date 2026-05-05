@@ -479,10 +479,10 @@ extra_items = {
     "Nuclear Orange Argemia Plush":             ExtraItem({IC.filler: 1}),
     "Bonus Points":                             ExtraItem({IC.filler: 1}),
 
-    "Maxwell":                                  ExtraItem({IC.filler | EC.funny: 1}),
-    "Argemwell":                                ExtraItem({IC.filler | EC.funny: 1}),
-    "Gnarpwell":                                ExtraItem({IC.filler | EC.funny: 1}),
-    "Eriewell":                                 ExtraItem({IC.filler | EC.funny: 1}),
+    # "Maxwell":                                  ExtraItem({IC.filler | EC.funny: 1}),
+    # "Argemwell":                                ExtraItem({IC.filler | EC.funny: 1}),
+    # "Gnarpwell":                                ExtraItem({IC.filler | EC.funny: 1}),
+    # "Eriewell":                                 ExtraItem({IC.filler | EC.funny: 1}),
     "Maid outfit":                              ExtraItem({IC.filler | EC.funny: 1}),
 
     "Ragdoll Trap":                             ExtraItem({IC.trap: 1}),

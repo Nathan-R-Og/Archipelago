@@ -123,6 +123,7 @@ class VOTVWorld(World):
     # The slot data is what youre sending to the AP server kinda. You dont have to add all your options. Really you want the ones you think a pop tracker would use
     # Seed, Slot, and TotalLocations are all super important for AP though, you need those
     def fill_slot_data(self) -> Dict[str, object]:
+        item_names = [x.name for x in self.item_pool]
         slot_data: Dict[str, object] = {
             "options": {
                 "ScrapRecipesAsItems":          self.options.scrap_recipes_as_items.value,
@@ -154,7 +155,7 @@ class VOTVWorld(World):
             },
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
-            "ItemNames": [x.name for i,x in enumerate(self.item_pool) if self.item_pool.index(x) == i],  # unique names of all the items in our pool
+            "ItemNames": [x for i,x in enumerate(item_names) if item_names.index(x) == i],  # unique names of all the items in our pool
             "TotalLocations": get_total_locations(self)  # get_total_locations(self) comes from Locations.py
         }
 

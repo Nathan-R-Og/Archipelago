@@ -26,11 +26,6 @@ from .data.item_data import ExtraClassification, shop_items, extra_items, goal_i
 if TYPE_CHECKING:
     from . import VOTVWorld
 
-class ItemValidity(IntEnum):
-    INVALID = 0
-    VALID = 1
-    PROGRESSION = 2
-
 def is_valid_item(world: "VOTVWorld", name: str, classification: int) -> ItemClassification | None:
     if name == "Day" and not world.options.day_as_items.value:
         return None
@@ -161,9 +156,12 @@ def create_itempool(world: "VOTVWorld") -> list[Item]:
         if name in shuffle_blacklist:
             continue
 
-        items = create_items(world, name)
-        useful_or_progression_items = tuple(x for x in items if x.classification & ItemClassification.progression or x.classification & ItemClassification.useful)
-        item_pool += useful_or_progression_items
+        item = item_table[name]
+        for classification, amount in item.classification.items():
+            classification = is_valid_item(world, name, classification)
+            if classification is None or not (classification & ItemClassification.progression or classification & ItemClassification.useful):
+                continue
+            item_pool += create_items(world, name, classification, amount)
 
     # Then junk items are made
     # Check out the create_junk_items function for more details
@@ -171,16 +169,9 @@ def create_itempool(world: "VOTVWorld") -> list[Item]:
 
     return item_pool
 
-def create_items(world: "VOTVWorld", name: str) -> list[Item]:
+def create_items(world: "VOTVWorld", name: str, classification: ItemClassification | None = None, amount: int = 1) -> list[Item]:
     item = item_table[name]
-    result: list[Item] = []
-    for classification, amount in item.classification.items():
-        classification = is_valid_item(world, name, classification)
-        if classification is None:
-            continue
-        result += (VOTVItem(name, classification, item.ap_code, world.player) for _ in range(amount))
-
-    return result
+    return [VOTVItem(name, classification or next(iter(item.classification.keys())), item.ap_code, world.player) for _ in range(amount)]
 
 # Finally, where junk items are created
 def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
@@ -249,6 +240,5 @@ for name, item in goal_items.items():
 # This makes a really convenient list of all the other dictionaries
 # (fun fact: {} is a dictionary)
 item_table = {
-    **votv_items,
-    "Victory": ItemData(None, {ItemClassification.progression: 1})
+    **votv_items
 }

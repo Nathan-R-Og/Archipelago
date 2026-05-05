@@ -105,7 +105,17 @@ def is_valid_location(world: "VOTVWorld", name: str) -> bool:
     ):
         return False
 
-    if location_info.radioactive_capsule_craft_required and not world.options.require_mining.value:
+    # I know it's weird to do tri-state like that, but it works
+    if location_info.radioactive_capsule_craft_required == True and not world.options.require_mining.value:
+        return False
+
+    if location_info.radioactive_capsule_craft_required == False and world.options.require_mining.value:
+        return False
+    
+    if location_info.maintenance_task and not world.options.maintenance_tasks.value:
+        return False
+    
+    if location_info.cooking_task and not world.options.cooking_tasks.value:
         return False
 
     return True

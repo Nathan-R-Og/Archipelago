@@ -21,7 +21,9 @@ class LocationInfo(NamedTuple):
     goals: set[VOTVGoal] = set()
     rule: Rule | None = None
     is_buried: bool = False
-    radioactive_capsule_craft_required: bool = False
+    radioactive_capsule_craft_required: bool | None = None
+    maintenance_task: bool = False
+    cooking_task: bool = False
     is_time_sensitive: bool = False
     is_funny: bool = False
     is_final: bool = False
@@ -101,8 +103,8 @@ locations = {
     "Pickaxe":                          LocationInfo("At the Lake", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, rule=Has("Scuba Gear")),
     "Omega AI Module":                  LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, rule=Has("Scuba Gear")),
 
-    "Buried Capsule":                   LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, is_buried=True, rule=Has("Shovel") & OptionFilter(RequireMining, False)),
-    "Crafted Capsule":                  LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, rule=HasAll("Hazmat Suit", "Gas Welder", "Radioactive Capsule Blueprint") & HasAny("Pickaxe", "Hacksaw") & OptionFilter(RequireMining, True)),
+    "Buried Capsule":                   LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, is_buried=True, radioactive_capsule_craft_required=False, rule=Has("Shovel")),
+    "Crafted Capsule":                  LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, radioactive_capsule_craft_required=True, rule=HasAll("Hazmat Suit", "Gas Welder", "Radioactive Capsule Blueprint") & HasAny("Pickaxe", "Hacksaw")),
 
     "Basement Skull":                   LocationInfo("", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}),
     "Buried Box Skull":                 LocationInfo("At 263.25/-7.25", ["Misc"], goals={VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, rule=Has("Shovel")),
@@ -152,6 +154,14 @@ locations = {
     **{f"Repair Transformer {i+1}":     LocationInfo("", ["Tasks"]) for i in range(max_transformer_repair_locations)},
     **{f"Replace Fuse {i+1}":           LocationInfo("", ["Tasks"]) for i in range(max_fuse_replacement_locations)},
     **{f"Sell 10 Full Trash Bags {i+1}": LocationInfo("", ["Tasks"]) for i in range(max_trash_cleaning_locations)},
+
+    "Repair the Oven":                  LocationInfo("", ["Tasks"], maintenance_task=True),
+    "Clean the Toilet":                 LocationInfo("", ["Tasks"], maintenance_task=True),
+    "Clean the Sink":                   LocationInfo("", ["Tasks"], maintenance_task=True),
+    "Clean the Shower":                 LocationInfo("", ["Tasks"], maintenance_task=True),
+    "Bake Cookies":                     LocationInfo("", ["Tasks"], cooking_task=True),
+    "Bake Bread":                       LocationInfo("", ["Tasks"], cooking_task=True),
+    "Bake a Pizza":                     LocationInfo("", ["Tasks"], cooking_task=True),
 
     "Kerfur-Omega":                     LocationInfo("", ["Kerfur-Omega"], goals={VOTVGoal.KERFUR_OMEGA}, is_final=True, rule=(
         HasAllCounts({"Kerfur": 2, "Radioactive Capsule": 1, "Omega AI Module": 1, "Limb Joint": 4, "Ball Joint": 6, "Progressive Camera": 3, "Kerfur-Omega Complete Manual": 1})
