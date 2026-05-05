@@ -127,6 +127,13 @@ class SignalLocations(Range):
     range_end = max_signal_locations
     default = 5
 
+class BackwardsSignalLevels(DefaultOnToggle):
+    """
+    Determines if selling a signal also gives you a location for all the levels underneath.
+    For example, selling a level 2 signal would also give a level 0 and level 1 location.
+    """
+    display_name = "Backwards Signal Levels"
+
 class DailyTaskLocations(Range):
     """
     Determines the number of "Daily Task Done" locations to create.
@@ -286,6 +293,7 @@ class VOTVOptions(PerGameCommonOptions):
     bonus_points_amount:            BonusPointsAmount
     survive_days_locations:         SurviveDayLocations
     signal_locations:               SignalLocations
+    backwards_signal_levels:        BackwardsSignalLevels
     daily_task_locations:           DailyTaskLocations
     fuse_replacement_locations:     FuseReplacementLocations
     server_repair_locations:        ServerRepairLocations
@@ -323,6 +331,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         BonusPointsAmount,
         SurviveDayLocations,
         SignalLocations,
+        BackwardsSignalLevels,
         DailyTaskLocations,
         FuseReplacementLocations,
         ServerRepairLocations,

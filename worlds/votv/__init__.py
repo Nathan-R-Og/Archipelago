@@ -126,6 +126,9 @@ class VOTVWorld(World):
         item_names = [x.name for x in self.item_pool]
         slot_data: Dict[str, object] = {
             "options": {
+                "BackwardsSignalLevels":        self.options.backwards_signal_levels.value,
+                "MaintenanceTasks":             self.options.maintenance_tasks.value,
+                "CookingTasks":                 self.options.cooking_tasks.value,
                 "ScrapRecipesAsItems":          self.options.scrap_recipes_as_items.value,
                 "UpgradesAsItems":              self.options.upgrades_as_items.value,
                 "PhysicalModulesAsItems":       self.options.physical_modules_as_items.value,
