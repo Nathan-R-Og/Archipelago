@@ -91,9 +91,16 @@ class PhysicalModulesAsItems(DefaultOnToggle):
     """
     display_name = "Physical Modules As Items"
 
+class ATVUpgradesAsItems(DefaultOnToggle):
+    """
+    Determines if ATV upgrades will be created as items.
+    """
+    display_name = "ATV Upgrades As Items"
+
 class OnlyBonusPoints(DefaultOffToggle):
     """
     Determines if filler items will only be Bonus Points.
+    Traps will still be generated based on the trap chance.
     """
     display_name = "Only Bonus Points"
 
@@ -289,6 +296,7 @@ class VOTVOptions(PerGameCommonOptions):
     scrap_recipes_as_items:         ScrapRecipesAsItems
     upgrades_as_items:              UpgradesAsItems
     physical_modules_as_items:      PhysicalModulesAsItems
+    atv_upgrades_as_items:          ATVUpgradesAsItems
     only_bonus_points:              OnlyBonusPoints
     bonus_points_amount:            BonusPointsAmount
     survive_days_locations:         SurviveDayLocations
@@ -327,6 +335,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         ScrapRecipesAsItems,
         UpgradesAsItems,
         PhysicalModulesAsItems,
+        ATVUpgradesAsItems,
         OnlyBonusPoints,
         BonusPointsAmount,
         SurviveDayLocations,

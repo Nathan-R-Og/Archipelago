@@ -95,13 +95,17 @@ def is_valid_location(world: "VOTVWorld", name: str) -> bool:
     if location_info.is_funny and not world.options.funny_setting.value:
         return False
 
-    if location_info.is_time_sensitive and not world.options.time_sensitive.value:
+    if (
+        location_info.is_time_sensitive
+        and not world.options.time_sensitive.value
+        and world.options.objective not in location_info.goals
+    ):
         return False
 
     if (
-        not world.options.buried_items.value
+        location_info.is_buried
+        and not world.options.buried_items.value
         and world.options.objective not in location_info.goals
-        and location_info.is_buried
     ):
         return False
 

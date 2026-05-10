@@ -44,13 +44,15 @@ def is_valid_item(world: "VOTVWorld", name: str, classification: int) -> ItemCla
     if name.startswith("Physical Module") and not world.options.physical_modules_as_items:
         return None
     
+    if name.startswith("ATV Upgrade") and not world.options.atv_upgrades_as_items:
+        return None
+    
     if (
         name == "Lifecrystal Signal"
         and not (
             world.options.argemia_plushes >= world.options.argemia_plushes.option_rgbycm
-            or world.options.objective in (VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH)
             or world.options.buried_items.value and world.options.hell_rock_enabled
-            or world.options.objective == VOTVGoal.HELL_ROCK
+            or world.options.objective in (VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH, VOTVGoal.HELL_ROCK)
         )
     ):
         return None
@@ -143,7 +145,7 @@ def create_itempool(world: "VOTVWorld") -> list[Item]:
         case VOTVGoal.LAMBERT_PLUSH:
             location_name = "Lambert Plush"
         case VOTVGoal.GREEN_CABINET:
-            location_name = "Green Cabinet Open"
+            location_name = "Open the Green Cabinet"
         case VOTVGoal.SURVIVE:
             location_name = f"Survive Day {world.options.survive_day.value}"
 
@@ -181,20 +183,19 @@ def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
     trap_list: list[str] = []
 
     # This grabs all the junk items and trap items
-    if not world.options.only_bonus_points:
-        for name, item in item_table.items():
-            if name == "Bonus Points":  # Special filler item used when there's not enough items
+    for name, item in item_table.items():
+        if name == "Bonus Points":  # Special filler item used when there's not enough items
+            continue
+
+        for classification, amount in item.classification.items():
+            classification = is_valid_item(world, name, classification)
+            if classification is None:
                 continue
 
-            for classification, amount in item.classification.items():
-                classification = is_valid_item(world, name, classification)
-                if classification is None:
-                    continue
-
-                if classification == ItemClassification.filler:
-                    junk_list += (name for _ in range(amount))
-                elif classification == ItemClassification.trap:
-                    trap_list += (name for _ in range(amount))
+            if classification == ItemClassification.filler and not world.options.only_bonus_points:
+                junk_list += (name for _ in range(amount))
+            elif classification == ItemClassification.trap:
+                trap_list += (name for _ in range(amount))
 
     # Where all the magic happens of adding the junk and traps randomly
     # AP does all the weight management so we just need to worry about how many are created
@@ -208,7 +209,7 @@ def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
             continue
 
         name = world.random.choice(current_list)
-        current_list.remove(name)
+        if current_list != trap_list: current_list.remove(name)
         junk_pool.append(world.create_item(name))
 
     return junk_pool
