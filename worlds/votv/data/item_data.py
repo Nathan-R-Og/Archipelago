@@ -467,6 +467,7 @@ extra_items = {
     "Progressive Detector Frequency":           ExtraItem({IC.filler | EC.upgrade: 16}),
     "Progressive Detector Quality":             ExtraItem({IC.filler | EC.upgrade: 16}),
     "Progressive Coordinate Speed":             ExtraItem({IC.filler | EC.upgrade: 16}),
+    "Progressive Breaker Time":                 ExtraItem({IC.filler | EC.upgrade: 16}),
     "Physical Module (Radar Colors)":           ExtraItem({IC.filler: 1}),
     "Physical Module (Radar Alarm)":            ExtraItem({IC.filler: 1}),
     "Physical Module (Radar Radius)":           ExtraItem({IC.filler: 1}),

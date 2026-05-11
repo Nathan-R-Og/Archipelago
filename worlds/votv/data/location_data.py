@@ -39,6 +39,8 @@ locations = {
     "Alpha Toolbox":                    LocationInfo("", ["Tools"]),
 
     **{f"TR{i+1} Watering Can":         LocationInfo("", ["Misc"]) for i in range(3)},
+    "TR1 Cigarettes":                   LocationInfo("", ["Misc"]),
+    "TR1 Tinfoil Hat":                  LocationInfo("", ["Misc"]),
     "TR1 Toolbox":                      LocationInfo("", ["Tools"]),
     "TR1 Lighter":                      LocationInfo("", ["Tools"]),
     "TR2 Car Battery Charger":          LocationInfo("", ["Tools"]),

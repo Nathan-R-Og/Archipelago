@@ -156,6 +156,7 @@ class VOTVWorld(World):
                 "ArgemiaPlushes":               self.options.argemia_plushes.value,
                 "TrapChance":                   self.options.trap_chance.value
             },
+            "Version": [0, 0, 2],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
             "ItemNames": [x for i,x in enumerate(item_names) if item_names.index(x) == i],  # unique names of all the items in our pool

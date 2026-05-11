@@ -77,7 +77,7 @@ def is_valid_location(world: "VOTVWorld", name: str) -> bool:
         count = world.options.fuse_replacement_locations
         return int(name.split(" ")[-1]) <= count
 
-    if name.startswith("Sell 10 Full Trash Bags"):
+    if "Full Trash Bags" in name:
         count = world.options.trash_bags_locations
         return int(name.split(" ")[-1]) <= count
 
