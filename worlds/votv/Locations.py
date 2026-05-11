@@ -80,6 +80,9 @@ def is_valid_location(world: "VOTVWorld", name: str) -> bool:
     if "Full Trash Bags" in name:
         count = world.options.trash_bags_locations
         return int(name.split(" ")[-1]) <= count
+    
+    if name.endswith("Sandwich") and not world.options.chicken_sandwiches:
+        return False
 
     if name not in locations:
         return True

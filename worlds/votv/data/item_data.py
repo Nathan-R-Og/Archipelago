@@ -421,6 +421,7 @@ extra_items = {
     "Lifecrystal Signal":                       ExtraItem({IC.progression: 1}),
     "Hiking Boots":                             ExtraItem({IC.progression: 1}),
     "Lighter":                                  ExtraItem({IC.progression: 1}),
+    "Cig Pack":                                 ExtraItem({IC.progression: 1}),
 
     "Crowbar":                                  ExtraItem({IC.useful: 1}),
     # "Lead Pipe":                                ExtraItem({IC.useful: 1}),
@@ -498,6 +499,7 @@ extra_items = {
     "Nuclear Orange Argemia Plush":             ExtraItem({IC.filler: 1}),
     "Seed Pack (The Thingy)":                   ExtraItem({IC.filler: 1}),
     "\"Svenskfisk\"":                           ExtraItem({IC.filler: 1}),
+    "Tinfoil Hat":                              ExtraItem({IC.filler: 1}),
     "Bonus Points":                             ExtraItem({IC.filler: 1}),
 
     # "Maxwell":                                  ExtraItem({IC.filler | EC.funny: 1}),

@@ -71,7 +71,7 @@ locations = {
     "Erie Plush":                       LocationInfo("Bury a meat garbage bag at Sierra", ["Plushes"], is_buried=True, rule=Has("Shovel"), is_time_sensitive=True),
     "Librarian Candle":                 LocationInfo("In the log under the lake surface", ["Plushes"], is_buried=True, rule=Has("Shovel")),
     "Dream Plush":                      LocationInfo("Buried near the south side of the Lake", ["Plushes"], is_buried=True, rule=HasAll("Shovel", "Metal Detector")),
-    "Monique Plush":                    LocationInfo("Smoke a cigarette and eat a baguette while sitting", ["Plushes"], rule=Has("Lighter")),
+    "Monique Plush":                    LocationInfo("Smoke a cigarette and eat a baguette that's on the ground while sitting", ["Plushes"], rule=HasAll("Lighter", "Cig Pack")),
 
     "Alpha Server Sandwich":            LocationInfo("Above the servers", ["Chicken Sandwiches"]),
     "Bathroom Sandwich":                LocationInfo("", ["Chicken Sandwiches"]),
