@@ -407,7 +407,7 @@ class ExtraItem(NamedTuple):
     classification: dict[IC, int]
 
 extra_items = {
-    "Hook":                                     ExtraItem({IC.progression: 1}),
+    "Half Hook":                                ExtraItem({IC.progression: 1, IC.useful: 1}),
     "Shovel":                                   ExtraItem({IC.progression: 1, IC.useful: 3}),
     "Metal Detector":                           ExtraItem({IC.progression: 1}),
     "Bunker Keycard":                           ExtraItem({IC.progression: 1}),
@@ -422,8 +422,8 @@ extra_items = {
     "Hiking Boots":                             ExtraItem({IC.progression: 1}),
     "Lighter":                                  ExtraItem({IC.progression: 1}),
     "Cig Pack":                                 ExtraItem({IC.progression: 1}),
+    "Crowbar":                                  ExtraItem({IC.progression: 1}),
 
-    "Crowbar":                                  ExtraItem({IC.useful: 1}),
     # "Lead Pipe":                                ExtraItem({IC.useful: 1}),
     "Axe":                                      ExtraItem({IC.useful: 1}),
     "Bike Helmet":                              ExtraItem({IC.useful: 1}),

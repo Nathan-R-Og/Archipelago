@@ -16,7 +16,7 @@ from BaseClasses import MultiWorld, Item, Tutorial
 from worlds.AutoWorld import World, CollectionState, WebWorld
 from typing import Dict
 
-from .Locations import get_location_names, get_total_locations
+from .Locations import get_location_groups, get_location_names, get_total_locations
 from .Items import create_items, create_itempool, item_table
 from .Options import VOTVOptions, create_option_groups
 from .Regions import create_regions
@@ -60,6 +60,7 @@ class VOTVWorld(World):
     item_name_to_id = {name: data.ap_code for name, data in item_table.items()}
     # get_location_names() will come from your Locations.py
     location_name_to_id = get_location_names()
+    location_name_groups = get_location_groups()
     # And these 2 are the name of your Options.py class.
     options_dataclass = VOTVOptions
     options: VOTVOptions  # type: ignore
@@ -148,7 +149,7 @@ class VOTVWorld(World):
                 "LambertPlushEnabled":          self.options.lambert_plush_enabled.value,
                 "GreenCabinetEnabled":          self.options.green_cabinet_enabled.value,
                 "Objective":                    self.options.objective.value,
-                "BuriedOrCraftedCapsule":       self.options.require_mining.value,
+                "EnableCraftedCapsule":         self.options.enable_crafted_capsule.value,
                 "DayAsItems":                   self.options.day_as_items.value,
                 "SurviveDay":                   self.options.survive_day.value,
                 "ChickenSandwiches":            self.options.chicken_sandwiches.value,
@@ -156,7 +157,7 @@ class VOTVWorld(World):
                 "ArgemiaPlushes":               self.options.argemia_plushes.value,
                 "TrapChance":                   self.options.trap_chance.value
             },
-            "Version": [0, 0, 2],
+            "Version": [0, 0, 3],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
             "ItemNames": [x for i,x in enumerate(item_names) if item_names.index(x) == i],  # unique names of all the items in our pool

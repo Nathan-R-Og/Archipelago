@@ -45,11 +45,11 @@ class Objective(Choice):
     """Survive for a set amount of days"""
     default = int(VOTVGoal.KERFUR_OMEGA)
 
-class RequireMining(DefaultOffToggle):
+class EnableCraftedCapsule(DefaultOffToggle):
     """
-    Determines if the Radioactive Capsule can be dug out or needs to be crafted.
+    Determines if the Crafted Radioactive Capsule is added as a location.
     """
-    display_name = "Require Mining for the Radioactive Capsule"
+    display_name = "Enable Crafted Radioactive Capsule"
 
 class SurviveDay(Range):
     """
@@ -85,24 +85,42 @@ class UpgradesAsItems(Choice):
     """All upgrade items"""
     default = 1
 
-class PhysicalModulesAsItems(DefaultOnToggle):
+class PhysicalModulesAsItems(Choice):
     """
     Determines if physical modules will be created as items.
     """
     display_name = "Physical Modules As Items"
+    option_none = 0
+    """No physical modules items"""
+    option_useful = 1
+    """Only useful and progression physical modules items"""
+    option_all = 2
+    """All physical modules items"""
+    default = 1
 
-class ATVUpgradesAsItems(DefaultOnToggle):
+class ATVUpgradesAsItems(Choice):
     """
     Determines if ATV upgrades will be created as items.
     """
     display_name = "ATV Upgrades As Items"
+    option_none = 0
+    """No ATV upgrade items"""
+    option_useful = 1
+    """Only useful and progression ATV upgrade items"""
+    option_all = 2
+    """All ATV upgrade items"""
+    default = 1
 
-class OnlyBonusPoints(DefaultOffToggle):
+class BonusPointsChance(Range):
     """
-    Determines if filler items will only be Bonus Points.
-    Traps will still be generated based on the trap chance.
+    Determines the chance for any junk item to become Bonus Points.
+    Set it to 0 for logic to attempt placing all filler items.
+    If there are more locations than items, remaining slots will always be filled with Bonus Points.
     """
-    display_name = "Only Bonus Points"
+    display_name = "Bonus Points Chance"
+    min = 0
+    max = 100
+    default = 0
 
 class BonusPointsAmount(Range):
     """
@@ -183,7 +201,7 @@ class TransformerRepairLocations(Range):
 
 class TrashBagsLocations(Range):
     """
-    Determines the number of "Sell 10 Full Trash Bags" locations to create.
+    Determines the number of "Sell 24 Full Trash Bags" locations to create.
     0 will generate none.
     """
     display_name = "Trash Bags Locations"
@@ -290,14 +308,14 @@ class TrapChance(Range):
 @dataclass
 class VOTVOptions(PerGameCommonOptions):
     objective:                      Objective
-    require_mining:                 RequireMining
+    enable_crafted_capsule:         EnableCraftedCapsule
     survive_day:                    SurviveDay
     day_as_items:                   DayAsItems
     scrap_recipes_as_items:         ScrapRecipesAsItems
     upgrades_as_items:              UpgradesAsItems
     physical_modules_as_items:      PhysicalModulesAsItems
     atv_upgrades_as_items:          ATVUpgradesAsItems
-    only_bonus_points:              OnlyBonusPoints
+    bonus_points_chance:            BonusPointsChance
     bonus_points_amount:            BonusPointsAmount
     survive_days_locations:         SurviveDayLocations
     signal_locations:               SignalLocations
@@ -327,7 +345,7 @@ class VOTVOptions(PerGameCommonOptions):
 votv_option_groups: Dict[str, List[type[Option]]] = {
     "Game Options": [
         Objective,
-        RequireMining,
+        EnableCraftedCapsule,
         SurviveDay
     ],
     "Item & Location Options": [
@@ -336,7 +354,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         UpgradesAsItems,
         PhysicalModulesAsItems,
         ATVUpgradesAsItems,
-        OnlyBonusPoints,
+        BonusPointsChance,
         BonusPointsAmount,
         SurviveDayLocations,
         SignalLocations,

@@ -28,6 +28,14 @@ def get_location_names() -> dict[str, int]:
     names = {name: data.ap_code for name, data in location_table.items()}
     return names
 
+def get_location_groups() -> dict[str, set[str]]:
+    groups: dict[str, set[str]] = {}
+    for name, location in locations.items():
+        if location.group not in groups:
+            groups[location.group] = set()
+        groups[location.group].add(name)
+    return groups
+
 def is_goal_enabled(world: "VOTVWorld", goal: VOTVGoal):
     return (world.options.objective == goal
         or goal == VOTVGoal.KERFUR_OMEGA and world.options.kerfur_omega_enabled.value
@@ -112,11 +120,7 @@ def is_valid_location(world: "VOTVWorld", name: str) -> bool:
     ):
         return False
 
-    # I know it's weird to do tri-state like that, but it works
-    if location_info.radioactive_capsule_craft_required == True and not world.options.require_mining.value:
-        return False
-
-    if location_info.radioactive_capsule_craft_required == False and world.options.require_mining.value:
+    if location_info.radioactive_capsule_craft_required and not world.options.enable_crafted_capsule.value:
         return False
     
     if location_info.maintenance_task and not world.options.maintenance_tasks.value:

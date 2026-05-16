@@ -13,7 +13,7 @@ import logging
 from BaseClasses import Item, ItemClassification
 from typing import TYPE_CHECKING, Sequence
 
-from worlds.votv.Options import UpgradesAsItems
+from worlds.votv.Options import ATVUpgradesAsItems, PhysicalModulesAsItems, UpgradesAsItems
 
 # These come from the other files in this example. If you want to see the source ctrl + click the name
 # You can also do that ctrl + click for any functions to see what they do
@@ -41,10 +41,26 @@ def is_valid_item(world: "VOTVWorld", name: str, classification: int) -> ItemCla
     ):
         return None
     
-    if name.startswith("Physical Module") and not world.options.physical_modules_as_items:
+    if (
+        name.startswith("Physical Module")
+        and not (
+            world.options.physical_modules_as_items.value == PhysicalModulesAsItems.option_all
+            or world.options.physical_modules_as_items.value == PhysicalModulesAsItems.option_useful and (
+                classification & ItemClassification.progression or classification & ItemClassification.useful
+            )
+        )
+    ):
         return None
     
-    if name.startswith("ATV Upgrade") and not world.options.atv_upgrades_as_items:
+    if (
+        name.startswith("ATV Upgrade")
+        and not (
+            world.options.atv_upgrades_as_items.value == ATVUpgradesAsItems.option_all
+            or world.options.atv_upgrades_as_items.value == ATVUpgradesAsItems.option_useful and (
+                classification & ItemClassification.progression or classification & ItemClassification.useful
+            )
+        )
+    ):
         return None
     
     if (
@@ -178,6 +194,7 @@ def create_items(world: "VOTVWorld", name: str, classification: ItemClassificati
 # Finally, where junk items are created
 def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
     trap_chance = world.options.trap_chance.value
+    bonus_points_chance = world.options.bonus_points_chance.value
     junk_pool: list[Item] = []
     junk_list: list[str] = []
     trap_list: list[str] = []
@@ -192,7 +209,7 @@ def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
             if classification is None:
                 continue
 
-            if classification == ItemClassification.filler and not world.options.only_bonus_points:
+            if classification == ItemClassification.filler:
                 junk_list += (name for _ in range(amount))
             elif classification == ItemClassification.trap:
                 trap_list += (name for _ in range(amount))
@@ -201,10 +218,10 @@ def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
     # AP does all the weight management so we just need to worry about how many are created
     for _ in range(count):
         current_list = junk_list
-        if trap_chance > 0 and world.random.randint(1, 100) <= trap_chance:
+        if world.random.randint(1, 100) <= trap_chance:
             current_list = trap_list
 
-        if len(current_list) == 0:
+        if len(current_list) == 0 or world.random.randint(1, 100) <= bonus_points_chance:
             junk_pool.append(world.create_item("Bonus Points"))
             continue
 
