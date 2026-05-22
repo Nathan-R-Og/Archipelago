@@ -3,8 +3,11 @@
 # Its helpful for grouping variables, making them easy to access, and consistent
 
 from enum import IntEnum
-from typing import NamedTuple, Optional
+from typing import TYPE_CHECKING, Callable, NamedTuple, Optional
 from BaseClasses import Location, Item, ItemClassification
+
+if TYPE_CHECKING:
+    from . import VOTVWorld
 
 # These 2 make it so that the generic Location and Item types are more specific for your game
 class VOTVLocation(Location):
@@ -25,7 +28,7 @@ ITEM_OFFSET = 0
 # Adding = x at the end adds a default to it so if you dont include it, it'll default to whatever you put after it
 class ItemData(NamedTuple):
     base_code: Optional[int]
-    classification: dict[ItemClassification, int]
+    classification: dict[ItemClassification, int] | Callable[[VOTVWorld], dict[ItemClassification, int]]
 
     @property
     def ap_code(self):

@@ -1,8 +1,13 @@
-from enum import IntFlag
-from typing import NamedTuple, Optional
+from functools import reduce
+from typing import TYPE_CHECKING, Callable, NamedTuple, Optional
 from BaseClasses import ItemClassification as IC
 
+from ..Options import ATVUpgradesAsItems, ArgemiaPlushes, PhysicalModulesAsItems, UpgradesAsItems
+from ..Utils import furfur_plush_enabled, is_goal_enabled, resolve
 from ..Types import VOTVGoal
+
+if TYPE_CHECKING:
+    from .. import VOTVWorld
 
 class ShopItem(NamedTuple):
     cost: Optional[int] = 1
@@ -21,18 +26,6 @@ class ShopItem(NamedTuple):
             if not all(rule in whitelist for rule in unlocks):
                 return False
         return True
-
-class ExtraClassification(IntFlag):
-    buried = 1 << 5
-    """Related to burying"""
-    time_sensitive = 1 << 6
-    """In-game-time-sensitive item"""
-    funny = 1 << 7
-    """Related to the funny setting"""
-    upgrade = 1 << 8
-    """Is a progressive upgrade item"""
-
-EC = ExtraClassification
 
 #my general classifications are
 #things you actually need to do your job = useful
@@ -403,155 +396,241 @@ shop_items = {
     "Bandage":                          ShopItem(35, 1, "bandage", IC.filler),
 }
 
+if TYPE_CHECKING:
+    Classification = dict[IC, int]
+    DynamicClassification = Callable[[VOTVWorld], dict[IC, int]]
+    ClassificationResolvable = dict[IC, int] | DynamicClassification
+
 class ExtraItem(NamedTuple):
-    classification: dict[IC, int]
+    classification: ClassificationResolvable
 
-extra_items = {
-    "Half Hook":                                ExtraItem({IC.progression: 1, IC.useful: 1}),
-    "Shovel":                                   ExtraItem({IC.progression: 1, IC.useful: 3}),
-    "Metal Detector":                           ExtraItem({IC.progression: 1}),
-    "Bunker Keycard":                           ExtraItem({IC.progression: 1}),
-    "Scuba Mask":                               ExtraItem({IC.progression: 1}),
-    "Scuba Mask Tank":                          ExtraItem({IC.progression: 1}),
-    "Metal Scrap Recipe":                       ExtraItem({IC.progression: 1}),
-    "Electronic Scrap Recipe":                  ExtraItem({IC.progression: 1}),
-    "Glass Scrap Recipe":                       ExtraItem({IC.progression: 1}),
-    "Plastic Scrap Recipe":                     ExtraItem({IC.progression: 1}),
-    "Progressive Processing Level":             ExtraItem({IC.progression | EC.upgrade: 3}),
-    "Lifecrystal Signal":                       ExtraItem({IC.progression: 1}),
-    "Hiking Boots":                             ExtraItem({IC.progression: 1}),
-    "Lighter":                                  ExtraItem({IC.progression: 1}),
-    "Cig Pack":                                 ExtraItem({IC.progression: 1}),
-    "Crowbar":                                  ExtraItem({IC.progression: 1}),
+def goal_item(goals: set[VOTVGoal], classification: ClassificationResolvable) -> DynamicClassification:
+    def resolve_goal_item(world: VOTVWorld):
+        # The item's objective is active: override all other filters and set all classification to progression
+        if world.options.objective.value in goals:
+            copy = world.options.as_dict()
+            world.options.argemia_plushes.value = ArgemiaPlushes.option_all
+            world.options.buried_items.value = 1
+            world.options.time_sensitive.value = 1
+            world.options.scrap_recipes_as_items.value = 1
+            world.options.funny_setting.value = 1
+            world.options.upgrades_as_items.value = UpgradesAsItems.option_all
+            world.options.physical_modules_as_items.value = PhysicalModulesAsItems.option_all
+            world.options.atv_upgrades_as_items.value = ATVUpgradesAsItems.option_all
 
-    # "Lead Pipe":                                ExtraItem({IC.useful: 1}),
-    "Axe":                                      ExtraItem({IC.useful: 1}),
-    "Bike Helmet":                              ExtraItem({IC.useful: 1}),
-    "Digital Map":                              ExtraItem({IC.useful: 1}),
-    "Progressive Processing Speed":             ExtraItem({IC.useful | EC.upgrade: 8, IC.filler | EC.upgrade: 8}),
-    "Progressive Download Speed":               ExtraItem({IC.useful | EC.upgrade: 8, IC.filler | EC.upgrade: 8}),
-    "Progressive Detector Strength":            ExtraItem({IC.useful | EC.upgrade: 8, IC.filler | EC.upgrade: 8}),
-    "Progressive Cursor Drift":                 ExtraItem({IC.useful | EC.upgrade: 8, IC.filler | EC.upgrade: 8}),
-    "Progressive Cursor Speed":                 ExtraItem({IC.useful | EC.upgrade: 8, IC.filler | EC.upgrade: 8}),
-    "Progressive Ping Cooldown":                ExtraItem({IC.useful | EC.upgrade: 8, IC.filler | EC.upgrade: 8}),
-    "Progressive Ping Speed":                   ExtraItem({IC.useful | EC.upgrade: 8, IC.filler | EC.upgrade: 8}),
-    "Physical Module (Storm Filter)":           ExtraItem({IC.useful: 1}),
-    "Physical Module (Automatic Polarity Adjustment)": ExtraItem({IC.useful: 1}),
-    "Physical Module (Automatic Signal Processing)": ExtraItem({IC.useful: 1}),
-    "Physical Module (Global Alert)":           ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Big Lights)":                 ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Bumper)":                     ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Belt)":                       ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Overcharged Engine)":         ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Alternator)":                 ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Container)":                  ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Solar Panel)":                ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Floaties)":                   ExtraItem({IC.useful: 1}),
-    "ATV Upgrade (Air Control)":                ExtraItem({IC.useful: 1}),
-    "Progressive Sleeping Bag":                 ExtraItem({IC.useful: 3}),
-    "Rubber Scrap Recipe":                      ExtraItem({IC.useful: 1}),
-    "Paper Scrap Recipe":                       ExtraItem({IC.useful: 1}),
-    "Wood Scrap Recipe":                        ExtraItem({IC.useful: 1}),
-    "Toolbox":                                  ExtraItem({IC.useful: 1, IC.filler: 1}),
-    "Car Battery Charger":                      ExtraItem({IC.useful: 1}),
-    "First Aid Medkit":                         ExtraItem({IC.useful: 1}),
-    "Backpack":                                 ExtraItem({IC.useful: 1}),
+            result = resolve(plus(*({IC.progression: v} for v in classification.values())), world)
 
-    "Chicken Sandwich":                         ExtraItem({IC.filler: 20, IC.filler | EC.buried: 1}),
-    "Rubble Recipe":                            ExtraItem({IC.filler: 1}),
-    "Air Tablet":                               ExtraItem({IC.filler | EC.buried: 1}),
-    "Fire Tablet":                              ExtraItem({IC.filler | EC.buried: 1}),
-    "Earth Tablet":                             ExtraItem({IC.filler | EC.buried: 1}),
-    "Water Tablet":                             ExtraItem({IC.filler | EC.buried: 1}),
-    "Progressive Radar History":                ExtraItem({IC.filler | EC.upgrade: 3}),
-    "Progressive Radar Speed":                  ExtraItem({IC.filler | EC.upgrade: 16}),
-    "Progressive Detector Frequency":           ExtraItem({IC.filler | EC.upgrade: 16}),
-    "Progressive Detector Quality":             ExtraItem({IC.filler | EC.upgrade: 16}),
-    "Progressive Coordinate Speed":             ExtraItem({IC.filler | EC.upgrade: 16}),
-    "Progressive Breaker Time":                 ExtraItem({IC.filler | EC.upgrade: 16}),
-    "Physical Module (Radar Colors)":           ExtraItem({IC.filler: 1}),
-    "Physical Module (Radar Alarm)":            ExtraItem({IC.filler: 1}),
-    "Physical Module (Radar Radius)":           ExtraItem({IC.filler: 1}),
-    "Physical Module (Radar Path Tracking)":    ExtraItem({IC.filler: 1}),
-    "Physical Module (Radar Radial Search)":    ExtraItem({IC.filler: 1}),
-    "Physical Module (Coordinate Triangle Visualise)": ExtraItem({IC.filler: 1}),
-    "Physical Module (Autosave Signal to Database)": ExtraItem({IC.filler: 1}),
-    "Physical Module (Log Tapes Compression)":  ExtraItem({IC.filler: 1}),
-    "Physical Module (Lightning Prediction)":   ExtraItem({IC.filler: 1}),
-    "Physical Module (Spectrogram)":            ExtraItem({IC.filler: 1}),
-    "Physical Module (Remote Keyboard)":        ExtraItem({IC.filler: 1}),
-    "ATV Upgrade (Radio)":                      ExtraItem({IC.filler: 1}),
-    "ATV Upgrade (Map)":                        ExtraItem({IC.filler: 1}),
-    "Kerfur-Omega Documents Binder":            ExtraItem({IC.filler: 1}),
-    "Geiger Counter":                           ExtraItem({IC.filler: 1}),
-    "EMF Detector":                             ExtraItem({IC.filler | EC.buried: 1}),
-    "Lantern":                                  ExtraItem({IC.filler: 1}),
-    "Watering Can":                             ExtraItem({IC.filler: 3}),
-    "Deer Skull":                               ExtraItem({IC.filler: 1}),
-    "Antibreather Plush":                       ExtraItem({IC.filler | EC.time_sensitive: 1}),
-    "Erie Plush":                               ExtraItem({IC.filler | EC.buried | EC.time_sensitive: 1}),
-    "Monique Plush":                            ExtraItem({IC.filler: 1}),
-    "Librarian Candle":                         ExtraItem({IC.filler | EC.buried: 1}),
-    "Car Keys":                                 ExtraItem({IC.filler: 1}),
-    "Cooking Book":                             ExtraItem({IC.filler: 1}),
-    "Nuclear Pink Argemia Plush":               ExtraItem({IC.filler: 1}),
-    "Nuclear Yellow Argemia Plush":             ExtraItem({IC.filler | EC.buried: 1}),
-    "Nuclear Orange Argemia Plush":             ExtraItem({IC.filler: 1}),
-    "Seed Pack (The Thingy)":                   ExtraItem({IC.filler: 1}),
-    "\"Svenskfisk\"":                           ExtraItem({IC.filler: 1}),
-    "Tinfoil Hat":                              ExtraItem({IC.filler: 1}),
-    "Bonus Points":                             ExtraItem({IC.filler: 1}),
+            world.options.argemia_plushes.value = copy["argemia_plushes"]
+            world.options.buried_items.value = copy["buried_items"]
+            world.options.time_sensitive.value = copy["buried_items"]
+            world.options.scrap_recipes_as_items.value = copy["scrap_recipes_as_items"]
+            world.options.funny_setting.value = copy["funny_setting"]
+            world.options.upgrades_as_items.value = copy["upgrades_as_items"]
+            world.options.physical_modules_as_items.value = copy["physical_modules_as_items"]
+            world.options.atv_upgrades_as_items.value = copy["atv_upgrades_as_items"]
 
-    # "Maxwell":                                  ExtraItem({IC.filler | EC.funny: 1}),
-    # "Argemwell":                                ExtraItem({IC.filler | EC.funny: 1}),
-    # "Gnarpwell":                                ExtraItem({IC.filler | EC.funny: 1}),
-    # "Eriewell":                                 ExtraItem({IC.filler | EC.funny: 1}),
-    "Maid outfit":                              ExtraItem({IC.filler | EC.funny | EC.buried: 1}),
-    "Thiccfus Plush":                           ExtraItem({IC.filler | EC.funny: 1}),
+            return result
 
-    "Ragdoll Trap":                             ExtraItem({IC.trap: 1}),
-    "Breaker Trap":                             ExtraItem({IC.trap: 1}),
-    "Debug TP Trap":                            ExtraItem({IC.trap: 1}),
-    "Drunk Trap":                               ExtraItem({IC.trap: 1}),
-    "-50 Points Trap":                          ExtraItem({IC.trap: 1}),
-    "Flat Tire Trap":                           ExtraItem({IC.trap: 1}),
-    "Dead Battery Trap":                        ExtraItem({IC.trap: 1}),
-}
+        if any(is_goal_enabled(world, x) for x in goals):
+            return resolve(classification, world)
+        
+        return {}
 
-# Items that are required for certain objectives become filler/useful for other objectives
-class GoalItem(NamedTuple):
-    goals: set[VOTVGoal]
-    alternate_item: ExtraItem
-    """If one of the goals is selected, this item will be used and the classification overriden to progression"""
+    return resolve_goal_item
+
+def argemia_plush(setting: int, classification: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: resolve(classification, world) if world.options.argemia_plushes.value >= setting else {}
+
+def buried(classification: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: resolve(classification, world) if world.options.buried_items.value else {}
+
+def time_sensitive(classification: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: resolve(classification, world) if world.options.time_sensitive.value else {}
+
+def recipe(classification: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: resolve(classification, world) if world.options.scrap_recipes_as_items.value else {}
+
+def funny(classification: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: resolve(classification, world) if world.options.funny_setting.value else {}
+
+def upgrade(classification: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: {k: v for k, v in resolve(classification, world).items() if world.options.upgrades_as_items.value == UpgradesAsItems.option_all or world.options.upgrades_as_items.value == UpgradesAsItems.option_useful and (k & IC.progression or k & IC.useful)}
+
+def module(classification: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: {k: v for k, v in resolve(classification, world).items() if world.options.physical_modules_as_items.value == PhysicalModulesAsItems.option_all or world.options.physical_modules_as_items.value == PhysicalModulesAsItems.option_useful and (k & IC.progression or k & IC.useful)}
+
+def atv_upgrade(classification: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: {k: v for k, v in resolve(classification, world).items() if world.options.atv_upgrades_as_items.value == ATVUpgradesAsItems.option_all or world.options.atv_upgrades_as_items.value == ATVUpgradesAsItems.option_useful and (k & IC.progression or k & IC.useful)}
+
+def plus(*args: ClassificationResolvable) -> DynamicClassification:
+    return lambda world: {
+        k: sum(resolve(x, world)[k] if k in resolve(x, world) else 0 for x in args)
+        for k in reduce(lambda acc, x: {*acc, *resolve(x, world).keys()}, args, set())
+    }
 
 goal_items = {
-    "Kerfur-Omega Complete Manual":     GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler: 1})),
-    "Red Kerfur":                       GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.useful: 1})),
-    "Blue Kerfur":                      GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.useful: 1})),
-    "Pink Kerfur":                      GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.useful: 1})),
-    "Omega AI Module":                  GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler: 1})),
-    "Ball Joint":                       GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler | EC.buried: 12})),
-    "Limb Joint":                       GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler: 6})),
-    "Progressive Camera":               GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler: 3})),
-    "Hacksaw":                          GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.useful: 1})),
-    "Pickaxe":                          GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.useful: 1})),
-    "Hazmat Suit":                      GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler: 1})),
-    "Gas Welder":                       GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler: 3})),
-    "Radioactive Capsule Blueprint":    GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler: 1})),
-    "Radioactive Capsule":              GoalItem({VOTVGoal.KERFUR_OMEGA}, ExtraItem({IC.filler: 1})),
+    "Metal Detector":                   ExtraItem(lambda world: {IC.progression: 1} if world.options.buried_items.value else goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})(world)),
+    "Kerfur-Omega Complete Manual":     ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
+    "Red Kerfur":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
+    "Blue Kerfur":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
+    "Pink Kerfur":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
+    "Omega AI Module":                  ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
+    "Ball Joint":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, buried({IC.filler: 12}))),
+    "Limb Joint":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 6})),
+    "Progressive Camera":               ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 3})),
+    "Hacksaw":                          ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
+    "Pickaxe":                          ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
+    "Hazmat Suit":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
+    "Gas Welder":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 3})),
+    "Radioactive Capsule Blueprint":    ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
+    "Radioactive Capsule":              ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
 
-    "Skull":                            GoalItem({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, ExtraItem({IC.filler: 5, IC.filler | EC.buried: 2})),
+    "Skull":                            ExtraItem(goal_item({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, plus({IC.filler: 5}, buried({IC.filler: 2})))),
 
-    "Red Argemia Plush":                GoalItem({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, ExtraItem({IC.filler: 1})),
-    "Blue Argemia Plush":               GoalItem({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, ExtraItem({IC.filler: 1})),
-    "Green Argemia Plush":              GoalItem({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, ExtraItem({IC.filler: 1})),
-    "Yellow Argemia Plush":             GoalItem({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, ExtraItem({IC.filler: 1})),
-    "Magenta Argemia Plush":            GoalItem({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, ExtraItem({IC.filler: 1})),
-    "Cyan Argemia Plush":               GoalItem({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, ExtraItem({IC.filler: 1})),
-    "Shrimp Pack":                      GoalItem({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, ExtraItem({IC.useful: 17})),
+    "Red Argemia Plush":                ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgb, {IC.filler: 1}))),
+    "Blue Argemia Plush":               ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgb, {IC.filler: 1}))),
+    "Green Argemia Plush":              ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgb, {IC.filler: 1}))),
+    "Yellow Argemia Plush":             ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
+    "Magenta Argemia Plush":            ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
+    "Cyan Argemia Plush":               ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
+    "Shrimp Pack":                      ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, {IC.useful: 17})),
 
-    "Balloon Pack (WIP)":               GoalItem({VOTVGoal.LAMBERT_PLUSH}, ExtraItem({IC.filler: 1})),
-    "Ritual Knife":                     GoalItem({VOTVGoal.LAMBERT_PLUSH}, ExtraItem({IC.filler: 1})),
+    "Balloon Pack (WIP)":               ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
+    "Fire Rune":                        ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
+    "Earth Rune":                       ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
+    "Water Rune":                       ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
+    "Air Rune":                         ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
+    "Ritual Knife":                     ExtraItem(lambda world: {IC.progression: 1} if furfur_plush_enabled(world) else goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})(world)),
 
-    "Tile":                             GoalItem({VOTVGoal.GREEN_CABINET}, ExtraItem({IC.filler: 9}))
+    "Tile":                             ExtraItem(goal_item({VOTVGoal.GREEN_CABINET}, {IC.filler: 9}))
+}
+
+extra_items = {
+    "Half Hook":                                        ExtraItem({IC.progression: 1, IC.useful: 1}),
+    "Shovel":                                           ExtraItem({IC.progression: 1, IC.useful: 3}),
+    "Bunker Keycard":                                   ExtraItem({IC.progression: 1}),
+    "Scuba Mask":                                       ExtraItem({IC.progression: 1}),
+    "Scuba Mask Tank":                                  ExtraItem({IC.progression: 1}),
+    "Metal Scrap Recipe":                               ExtraItem(recipe({IC.progression: 1})),
+    "Electronic Scrap Recipe":                          ExtraItem(recipe({IC.progression: 1})),
+    "Glass Scrap Recipe":                               ExtraItem(recipe({IC.progression: 1})),
+    "Plastic Scrap Recipe":                             ExtraItem(recipe({IC.progression: 1})),
+    "Progressive Processing Level":                     ExtraItem(upgrade({IC.progression: 3})),
+    "Lifecrystal Signal":                               ExtraItem(lambda world: {IC.progression: 1} if any(is_goal_enabled(world, x) for x in {VOTVGoal.HELL_ROCK, VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}) else {}),
+    "Hiking Boots":                                     ExtraItem({IC.progression: 1}),
+    "Lighter":                                          ExtraItem({IC.progression: 1}),
+    "Cig Pack":                                         ExtraItem({IC.progression: 1}),
+    "Crowbar":                                          ExtraItem(lambda world: {(IC.progression if world.options.chicken_sandwiches.value else IC.useful): 1}),
+    "Day":                                              ExtraItem(lambda world: {IC.progression: 50} if world.options.day_as_items.value else {}),
+
+    "Furfur Altar Leg 1":                               ExtraItem(lambda world: time_sensitive({(IC.progression if furfur_plush_enabled(world) else IC.filler): 1})(world)),
+    "Furfur Altar Leg 2":                               ExtraItem(lambda world: buried({(IC.progression if furfur_plush_enabled(world) else IC.filler): 1})(world)),
+    "Furfur Altar Top":                                 ExtraItem(lambda world: buried(time_sensitive({(IC.progression if furfur_plush_enabled(world) else IC.filler): 1}))(world)),
+
+    # "Lead Pipe":                                        ExtraItem({IC.useful: 1}),
+    "Axe":                                              ExtraItem({IC.useful: 1}),
+    "Bike Helmet":                                      ExtraItem({IC.useful: 1}),
+    "Digital Map":                                      ExtraItem({IC.useful: 1}),
+    "Progressive Processing Speed":                     ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
+    "Progressive Download Speed":                       ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
+    "Progressive Detector Strength":                    ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
+    "Progressive Cursor Drift":                         ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
+    "Progressive Cursor Speed":                         ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
+    "Progressive Ping Cooldown":                        ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
+    "Progressive Ping Speed":                           ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
+    "Physical Module (Storm Filter)":                   ExtraItem(module({IC.useful: 1})),
+    "Physical Module (Automatic Polarity Adjustment)":  ExtraItem(module({IC.useful: 1})),
+    "Physical Module (Automatic Signal Processing)":    ExtraItem(module({IC.useful: 1})),
+    "Physical Module (Global Alert)":                   ExtraItem(module({IC.useful: 1})),
+    "Physical Module (Coordinate Triangle Visualise)":  ExtraItem(module({IC.useful: 1})),
+    "Physical Module (Radar Colors)":                   ExtraItem(module({IC.useful: 1})),
+    "ATV Upgrade (Big Lights)":                         ExtraItem(atv_upgrade({IC.useful: 1})),
+    "ATV Upgrade (Bumper)":                             ExtraItem(atv_upgrade({IC.useful: 1})),
+    "ATV Upgrade (Belt)":                               ExtraItem(atv_upgrade({IC.useful: 1})),
+    "ATV Upgrade (Overcharged Engine)":                 ExtraItem(atv_upgrade({IC.useful: 1})),
+    "ATV Upgrade (Alternator)":                         ExtraItem(atv_upgrade({IC.useful: 1})),
+    "ATV Upgrade (Container)":                          ExtraItem(atv_upgrade({IC.useful: 1})),
+    "ATV Upgrade (Solar Panel)":                        ExtraItem(atv_upgrade({IC.useful: 1})),
+    "ATV Upgrade (Map)":                                ExtraItem(atv_upgrade({IC.useful: 1})),
+    "Progressive Sleeping Bag":                         ExtraItem(recipe({IC.useful: 3})),
+    "Rubber Scrap Recipe":                              ExtraItem(recipe({IC.useful: 1})),
+    "Paper Scrap Recipe":                               ExtraItem(recipe({IC.useful: 1})),
+    "Wood Scrap Recipe":                                ExtraItem(recipe({IC.useful: 1})),
+    "Toolbox":                                          ExtraItem({IC.useful: 1, IC.filler: 3}),
+    "Car Battery Charger":                              ExtraItem({IC.useful: 1}),
+    "First Aid Medkit":                                 ExtraItem({IC.useful: 1}),
+    "Jar of Honey":                                     ExtraItem({IC.useful: 1}),
+
+    "Chicken Sandwich":                                 ExtraItem(plus({IC.filler: 19}, buried({IC.filler: 1}), time_sensitive({IC.filler: 1}))),
+    "Rubble Recipe":                                    ExtraItem(recipe({IC.filler: 1})),
+    "Air Tablet":                                       ExtraItem(buried({IC.filler: 1})),
+    "Fire Tablet":                                      ExtraItem(buried({IC.filler: 1})),
+    "Earth Tablet":                                     ExtraItem(buried({IC.filler: 1})),
+    "Water Tablet":                                     ExtraItem(buried({IC.filler: 1})),
+    "Progressive Radar History":                        ExtraItem(upgrade({IC.filler: 3})),
+    "Progressive Radar Speed":                          ExtraItem(upgrade({IC.filler: 16})),
+    "Progressive Detector Frequency":                   ExtraItem(upgrade({IC.filler: 16})),
+    "Progressive Detector Quality":                     ExtraItem(upgrade({IC.filler: 16})),
+    "Progressive Coordinate Speed":                     ExtraItem(upgrade({IC.filler: 16})),
+    "Progressive Breaker Time":                         ExtraItem(upgrade({IC.filler: 16})),
+    "Physical Module (Radar Alarm)":                    ExtraItem({IC.filler: 1}),
+    "Physical Module (Radar Radius)":                   ExtraItem({IC.filler: 1}),
+    "Physical Module (Radar Path Tracking)":            ExtraItem({IC.filler: 1}),
+    "Physical Module (Radar Radial Search)":            ExtraItem({IC.filler: 1}),
+    "Physical Module (Autosave Signal to Database)":    ExtraItem({IC.filler: 1}),
+    "Physical Module (Log Tapes Compression)":          ExtraItem({IC.filler: 1}),
+    "Physical Module (Lightning Prediction)":           ExtraItem({IC.filler: 1}),
+    "Physical Module (Spectrogram)":                    ExtraItem({IC.filler: 1}),
+    "Physical Module (Remote Keyboard)":                ExtraItem({IC.filler: 1}),
+    "ATV Upgrade (Radio)":                              ExtraItem({IC.filler: 1}),
+    "ATV Upgrade (Floaties)":                           ExtraItem({IC.filler: 1}),
+    "ATV Upgrade (Air Control)":                        ExtraItem({IC.filler: 1}),
+    "Kerfur-Omega Documents Binder":                    ExtraItem({IC.filler: 1}),
+    "Geiger Counter":                                   ExtraItem({IC.filler: 1}),
+    "EMF Detector":                                     ExtraItem(buried({IC.filler: 1})),
+    "Lantern":                                          ExtraItem({IC.filler: 1}),
+    "Watering Can":                                     ExtraItem({IC.filler: 3}),
+    "Deer Skull":                                       ExtraItem({IC.filler: 1}),
+    "Antibreather Plush":                               ExtraItem(time_sensitive({IC.filler: 1})),
+    "Erie Plush":                                       ExtraItem(buried(time_sensitive({IC.filler: 1}))),
+    "Monique Plush":                                    ExtraItem({IC.filler: 1}),
+    "Furfur Plush":                                     ExtraItem(lambda world: {IC.filler: 1} if furfur_plush_enabled(world) else {}),
+    "Cacti":                                            ExtraItem(buried({IC.filler: 1})),
+    "Librarian Candle":                                 ExtraItem(buried({IC.filler: 1})),
+    "Car Keys":                                         ExtraItem({IC.filler: 1}),
+    "Cooking Book":                                     ExtraItem({IC.filler: 1}),
+    "Nuclear Pink Argemia Plush":                       ExtraItem(argemia_plush(ArgemiaPlushes.option_all, {IC.filler: 1})),
+    "Nuclear Yellow Argemia Plush":                     ExtraItem(argemia_plush(ArgemiaPlushes.option_all, buried({IC.filler: 1}))),
+    "Nuclear Orange Argemia Plush":                     ExtraItem(argemia_plush(ArgemiaPlushes.option_all, {IC.filler: 1})),
+    "Seed Pack (The Thingy)":                           ExtraItem({IC.filler: 1}),
+    "\"Svenskfisk\"":                                   ExtraItem({IC.filler: 1}),
+    "Tinfoil Hat":                                      ExtraItem({IC.filler: 1}),
+    "Old Rifle":                                        ExtraItem({IC.filler: 1}),
+    "Ammo Box":                                         ExtraItem({IC.filler: 1}),
+    "Wall Clock":                                       ExtraItem({IC.filler: 1}),
+    "Unknown Fruit":                                    ExtraItem({IC.filler: 1}),
+    "Bowtie":                                           ExtraItem({IC.filler: 2}),
+    "Glasses":                                          ExtraItem({IC.filler: 2}),
+    "Badge":                                            ExtraItem({IC.filler: 2}),
+    "Jacket":                                           ExtraItem({IC.filler: 2}),
+    "Compost Bucket":                                   ExtraItem({IC.filler: 2}),
+    "Green Fire Rock":                                  ExtraItem(time_sensitive({IC.filler: 1})),
+    "Bonus Points":                                     ExtraItem({IC.filler: 1}),
+
+    # Previously shuffled, but I think it's better to just have the player keep them when found
+    # "Maxwell":                                          ExtraItem(funny({IC.filler: 1})),
+    # "Argemwell":                                        ExtraItem(funny({IC.filler: 1})),
+    # "Gnarpwell":                                        ExtraItem(funny({IC.filler: 1})),
+    # "Eriewell":                                         ExtraItem(funny({IC.filler: 1})),
+    "Thiccfus Plush":                                   ExtraItem(funny({IC.filler: 1})),
+    "Perkele Llama":                                    ExtraItem(funny({IC.filler: 1})),
+    "Maid outfit":                                      ExtraItem(funny(buried({IC.filler: 1}))),
+
+    "Ragdoll Trap":                                     ExtraItem({IC.trap: 1}),
+    "Breaker Trap":                                     ExtraItem({IC.trap: 1}),
+    "Debug TP Trap":                                    ExtraItem({IC.trap: 1}),
+    "Drunk Trap":                                       ExtraItem({IC.trap: 1}),
+    "Points Fine Trap":                                 ExtraItem({IC.trap: 1}),
+    "Flat Tire Trap":                                   ExtraItem({IC.trap: 1}),
+    "Dead Flashlight Trap":                             ExtraItem({IC.trap: 1})
 }

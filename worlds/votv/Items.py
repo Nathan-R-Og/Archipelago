@@ -1,99 +1,16 @@
-# So the goal here is to have a catalog of all the items in your game
-# To correctly generate a games items they need to be bundled in a list
-# A list in programming terms is anything in square brackets [] to put it simply
-
-# When a list is described its described as a list of x where x is the type of variable within it
-# IE: ["apple", "pear", "grape"] is a list of strings (anything inside "" OR '' are considered strings)
-
-# Logging = output. How you'll figure out whats going wrong
-from enum import IntEnum
-import logging
-
-# Built in AP imports
 from BaseClasses import Item, ItemClassification
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING
 
-from worlds.votv.Options import ATVUpgradesAsItems, PhysicalModulesAsItems, UpgradesAsItems
-
-# These come from the other files in this example. If you want to see the source ctrl + click the name
-# You can also do that ctrl + click for any functions to see what they do
+from .Utils import resolve
 from .Types import ItemData, VOTVGoal, VOTVItem
-from .Locations import get_total_locations, is_goal_enabled
+from .Locations import get_total_locations
 from .Constants import allowed_unlocks
-from .data.item_data import ExtraClassification, shop_items, extra_items, goal_items
+from .data.item_data import shop_items, extra_items, goal_items
 
-# This is just making sure nothing gets confused dw about what its doing exactly
 if TYPE_CHECKING:
     from . import VOTVWorld
 
 def is_valid_item(world: "VOTVWorld", name: str, classification: int) -> ItemClassification | None:
-    if name == "Day" and not world.options.day_as_items.value:
-        return None
-    
-    if (
-        classification & ExtraClassification.upgrade
-        and not (
-            world.options.upgrades_as_items.value == UpgradesAsItems.option_all
-            or world.options.upgrades_as_items.value == UpgradesAsItems.option_useful and (
-                classification & ItemClassification.progression or classification & ItemClassification.useful
-            )
-        )
-    ):
-        return None
-    
-    if (
-        name.startswith("Physical Module")
-        and not (
-            world.options.physical_modules_as_items.value == PhysicalModulesAsItems.option_all
-            or world.options.physical_modules_as_items.value == PhysicalModulesAsItems.option_useful and (
-                classification & ItemClassification.progression or classification & ItemClassification.useful
-            )
-        )
-    ):
-        return None
-    
-    if (
-        name.startswith("ATV Upgrade")
-        and not (
-            world.options.atv_upgrades_as_items.value == ATVUpgradesAsItems.option_all
-            or world.options.atv_upgrades_as_items.value == ATVUpgradesAsItems.option_useful and (
-                classification & ItemClassification.progression or classification & ItemClassification.useful
-            )
-        )
-    ):
-        return None
-    
-    if (
-        name == "Lifecrystal Signal"
-        and not (
-            world.options.argemia_plushes >= world.options.argemia_plushes.option_rgbycm
-            or world.options.buried_items.value and world.options.hell_rock_enabled
-            or world.options.objective in (VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH, VOTVGoal.HELL_ROCK)
-        )
-    ):
-        return None
-    
-    if name.endswith("Argemia Plush"):
-        has_argemia_plush_objective = world.options.objective in (VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH)
-        if not has_argemia_plush_objective:
-            if (
-                name.startswith("Red") or name.startswith("Green") or name.startswith("Blue")
-                and world.options.argemia_plushes.value < world.options.argemia_plushes.option_rgb
-            ):
-                return None
-
-            if (
-                name.startswith("Yellow") or name.startswith("Cyan") or name.startswith("Magenta")
-                and world.options.argemia_plushes.value < world.options.argemia_plushes.option_rgbycm
-            ):
-                return None
-        
-        if name.startswith("Nuclear") and world.options.argemia_plushes.value < world.options.argemia_plushes.option_all:
-            return None
-        
-    if name.endswith("Recipe") and not world.options.scrap_recipes_as_items:
-        return None
-
     if name in shop_items:
         if not world.options.shop_items.value:
             return None
@@ -101,32 +18,8 @@ def is_valid_item(world: "VOTVWorld", name: str, classification: int) -> ItemCla
         itemd = shop_items[name]
         if not itemd.checkUnlock(allowed_unlocks):
             return None
-    
-    itemd = None
-    if name in goal_items:
-        itemd = goal_items[name]
-        if world.options.objective not in itemd.goals:
-            if not any(is_goal_enabled(world, goal) for goal in itemd.goals):
-                return None
-            
-            itemd = itemd.alternate_item
-        else:
-            return ItemClassification.progression
 
-    if name in extra_items:
-        itemd = extra_items[name]
-
-    if itemd:
-        if classification & ExtraClassification.buried and not world.options.buried_items.value:
-            return None
-
-        if classification & ExtraClassification.time_sensitive and not world.options.time_sensitive.value:
-            return None
-
-        if classification & ExtraClassification.funny and not world.options.funny_setting.value:
-            return None
-
-    return ItemClassification(classification & 0b11111)
+    return ItemClassification(classification)
 
 # If you're curious about the -> list[Item] that is a syntax to make sure you return the correct variable type
 # In this instance we're saying we only want to return a list of items
@@ -175,7 +68,7 @@ def create_itempool(world: "VOTVWorld") -> list[Item]:
             continue
 
         item = item_table[name]
-        for classification, amount in item.classification.items():
+        for classification, amount in resolve(item.classification, world).items():
             classification = is_valid_item(world, name, classification)
             if classification is None or not (classification & ItemClassification.progression or classification & ItemClassification.useful):
                 continue
@@ -189,7 +82,7 @@ def create_itempool(world: "VOTVWorld") -> list[Item]:
 
 def create_items(world: "VOTVWorld", name: str, classification: ItemClassification | None = None, amount: int = 1) -> list[Item]:
     item = item_table[name]
-    return [VOTVItem(name, classification or next(iter(item.classification.keys())), item.ap_code, world.player) for _ in range(amount)]
+    return [VOTVItem(name, classification or next(iter(resolve(item.classification, world).keys())), item.ap_code, world.player) for _ in range(amount)]
 
 # Finally, where junk items are created
 def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
@@ -204,7 +97,7 @@ def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
         if name == "Bonus Points":  # Special filler item used when there's not enough items
             continue
 
-        for classification, amount in item.classification.items():
+        for classification, amount in resolve(item.classification, world).items():
             classification = is_valid_item(world, name, classification)
             if classification is None:
                 continue
@@ -237,7 +130,6 @@ def create_junk_items(world: "VOTVWorld", count: int) -> list[Item]:
 # I've seen some games that dynamically add item codes such as DOOM as well
 votv_items: dict[str, ItemData] = {
     "Victory": ItemData(1, {ItemClassification.progression: 1}),
-    "Day": ItemData(2, {ItemClassification.progression: 50}),
 }
 
 # programatically create junk and items from the shop
@@ -246,13 +138,8 @@ for name, item in shop_items.items():
     votv_items[name] = ItemData(current_id, {item.classification: 1})
     current_id += 1
 
-for name, item in extra_items.items():
+for name, item in {**extra_items, **goal_items}.items():
     votv_items[name] = ItemData(current_id, item.classification)
-    current_id += 1
-
-for name, item in goal_items.items():
-    # If their goal is selected, the classification will be overriden with progression
-    votv_items[name] = ItemData(current_id, item.alternate_item.classification)
     current_id += 1
 
 # This makes a really convenient list of all the other dictionaries

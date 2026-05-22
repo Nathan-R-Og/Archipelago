@@ -10,6 +10,7 @@
 # from random import randrange
 # Here you are only grabbing the randrange function from random. This is less bulky but you need to put exactly what you want from that file/library
 # If you want more things from the import add a comma like the worlds.AutoWorld import below
+from functools import reduce
 import logging
 
 from BaseClasses import MultiWorld, Item, Tutorial
@@ -47,8 +48,12 @@ class VOTVWeb(WebWorld):
 # Same as the first class its normally named whatever you named your folder with World at the end
 class VOTVWorld(World):
     """
-    This is where you describe your game. Pretend you are marketing the game and that people have no clue what it is.
-    Or make it silly. Whatever you wish I have no control over you.
+    Voices of the Void is a survival horror game where you work as a scientist in an isolated research lab in the mountains of Switzerland.
+    Your task is to gather signals from space, analyze them, process them and sell them to get points.
+
+    You can get regular signals and objects like dwarf planets and stars, or you can get something "unusual" or even "strange" and "unexplainable".
+
+    The game has 40+ days and unique events, 150+ unique signals, plenty of secrets, mysteries and easter eggs.
     """
 
     # You want to put the full name of the game here. If you shortened the name for the folder and class names, dont do that here
@@ -160,7 +165,7 @@ class VOTVWorld(World):
             "Version": [0, 0, 3],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
-            "ItemNames": [x for i,x in enumerate(item_names) if item_names.index(x) == i],  # unique names of all the items in our pool
+            "ItemNames": reduce(lambda acc, x: {**acc, x: (acc[x] if x in acc else 0) + 1}, item_names, {}),  # unique names of all the items in our pool
             "TotalLocations": get_total_locations(self)  # get_total_locations(self) comes from Locations.py
         }
 
