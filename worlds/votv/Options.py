@@ -111,6 +111,19 @@ class ATVUpgradesAsItems(Choice):
     """All ATV upgrade items"""
     default = 1
 
+class WorldItems(Choice):
+    """
+    Determines what world items are shuffled.
+    """
+    display_name = "World Items"
+    option_none = 0
+    """No world items"""
+    option_main = 1
+    """World items that are unique, useful, or otherwise scarce"""
+    option_all = 2
+    """All items found in the world"""
+    default = 1
+
 class BonusPointsChance(Range):
     """
     Determines the chance for any junk item to become Bonus Points.
@@ -221,6 +234,12 @@ class CookingTasks(DefaultOffToggle):
     """
     display_name = "Cooking Tasks As Locations"
 
+class RockCandles(DefaultOffToggle):
+    """
+    Determines if lighting the rock candles are locations.
+    """
+    display_name = "Rock Candles As Locations"
+
 class ShopItems(DefaultOffToggle):
     """
     Determines if purchasing shop items are locations.
@@ -315,6 +334,7 @@ class VOTVOptions(PerGameCommonOptions):
     upgrades_as_items:              UpgradesAsItems
     physical_modules_as_items:      PhysicalModulesAsItems
     atv_upgrades_as_items:          ATVUpgradesAsItems
+    # world_items:                    WorldItems
     bonus_points_chance:            BonusPointsChance
     bonus_points_amount:            BonusPointsAmount
     survive_days_locations:         SurviveDayLocations
@@ -327,6 +347,7 @@ class VOTVOptions(PerGameCommonOptions):
     trash_bags_locations:           TrashBagsLocations
     maintenance_tasks:              MaintenanceTasks
     cooking_tasks:                  CookingTasks
+    rock_candles:                   RockCandles
     shop_items:                     ShopItems
     chicken_sandwiches:             ChickenSandwiches
     buried_items:                   BuriedItems
@@ -354,6 +375,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         UpgradesAsItems,
         PhysicalModulesAsItems,
         ATVUpgradesAsItems,
+        # WorldItems,
         BonusPointsChance,
         BonusPointsAmount,
         SurviveDayLocations,
@@ -366,6 +388,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         TrashBagsLocations,
         MaintenanceTasks,
         CookingTasks,
+        RockCandles,
         ShopItems,
         ChickenSandwiches,
         BuriedItems,

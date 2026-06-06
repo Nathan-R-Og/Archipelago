@@ -28,7 +28,7 @@ ITEM_OFFSET = 0
 # Adding = x at the end adds a default to it so if you dont include it, it'll default to whatever you put after it
 class ItemData(NamedTuple):
     base_code: Optional[int]
-    classification: dict[ItemClassification, int] | Callable[[VOTVWorld], dict[ItemClassification, int]]
+    classification: dict[ItemClassification, int] | Callable[["VOTVWorld"], dict[ItemClassification, int]]
 
     @property
     def ap_code(self):

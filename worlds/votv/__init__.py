@@ -60,6 +60,7 @@ class VOTVWorld(World):
     game = "Voices of the Void"
 
     settings_key = "votv_options"
+    required_client_version = (0, 6, 7)
 
     # The item_table will be setup in  your Items.py. This line gets all the items you put into item_table and puts it in a way that AP can understand it
     item_name_to_id = {name: data.ap_code for name, data in item_table.items()}
@@ -160,9 +161,10 @@ class VOTVWorld(World):
                 "ChickenSandwiches":            self.options.chicken_sandwiches.value,
                 "BuriedItems":                  self.options.buried_items.value,
                 "ArgemiaPlushes":               self.options.argemia_plushes.value,
-                "TrapChance":                   self.options.trap_chance.value
+                "TrapChance":                   self.options.trap_chance.value,
+                "RockCandles":                  self.options.rock_candles.value
             },
-            "Version": [0, 0, 3],
+            "Version": [0, 3, 0],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
             "ItemNames": reduce(lambda acc, x: {**acc, x: (acc[x] if x in acc else 0) + 1}, item_names, {}),  # unique names of all the items in our pool

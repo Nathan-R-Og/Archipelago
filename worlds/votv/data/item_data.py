@@ -2,7 +2,7 @@ from functools import reduce
 from typing import TYPE_CHECKING, Callable, NamedTuple, Optional
 from BaseClasses import ItemClassification as IC
 
-from ..Options import ATVUpgradesAsItems, ArgemiaPlushes, PhysicalModulesAsItems, UpgradesAsItems
+from ..Options import ATVUpgradesAsItems, ArgemiaPlushes, PhysicalModulesAsItems, UpgradesAsItems, WorldItems
 from ..Utils import furfur_plush_enabled, is_goal_enabled, resolve
 from ..Types import VOTVGoal
 
@@ -402,14 +402,27 @@ if TYPE_CHECKING:
     ClassificationResolvable = dict[IC, int] | DynamicClassification
 
 class ExtraItem(NamedTuple):
-    classification: ClassificationResolvable
+    classification: "ClassificationResolvable"
+    world_item_tier: int | None = WorldItems.option_main
 
-def goal_item(goals: set[VOTVGoal], classification: ClassificationResolvable) -> DynamicClassification:
-    def resolve_goal_item(world: VOTVWorld):
+def goal_item(goals: set[VOTVGoal], classification: "ClassificationResolvable") -> "DynamicClassification":
+    def resolve_goal_item(world: "VOTVWorld"):
         # The item's objective is active: override all other filters and set all classification to progression
         if world.options.objective.value in goals:
-            copy = world.options.as_dict()
+            copy = world.options.as_dict(
+                "argemia_plushes",
+                # "world_items",
+                "buried_items",
+                "time_sensitive",
+                "scrap_recipes_as_items",
+                "funny_setting",
+                "upgrades_as_items",
+                "physical_modules_as_items",
+                "atv_upgrades_as_items"
+            )
+
             world.options.argemia_plushes.value = ArgemiaPlushes.option_all
+            # world.options.world_items.value = WorldItems.option_all
             world.options.buried_items.value = 1
             world.options.time_sensitive.value = 1
             world.options.scrap_recipes_as_items.value = 1
@@ -418,11 +431,12 @@ def goal_item(goals: set[VOTVGoal], classification: ClassificationResolvable) ->
             world.options.physical_modules_as_items.value = PhysicalModulesAsItems.option_all
             world.options.atv_upgrades_as_items.value = ATVUpgradesAsItems.option_all
 
-            result = resolve(plus(*({IC.progression: v} for v in classification.values())), world)
+            result = resolve(plus(*({IC.progression: v} for v in resolve(classification, world).values())), world)
 
             world.options.argemia_plushes.value = copy["argemia_plushes"]
+            # world.options.world_items.value = copy["world_items"]
             world.options.buried_items.value = copy["buried_items"]
-            world.options.time_sensitive.value = copy["buried_items"]
+            world.options.time_sensitive.value = copy["time_sensitive"]
             world.options.scrap_recipes_as_items.value = copy["scrap_recipes_as_items"]
             world.options.funny_setting.value = copy["funny_setting"]
             world.options.upgrades_as_items.value = copy["upgrades_as_items"]
@@ -438,31 +452,31 @@ def goal_item(goals: set[VOTVGoal], classification: ClassificationResolvable) ->
 
     return resolve_goal_item
 
-def argemia_plush(setting: int, classification: ClassificationResolvable) -> DynamicClassification:
+def argemia_plush(setting: int, classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: resolve(classification, world) if world.options.argemia_plushes.value >= setting else {}
 
-def buried(classification: ClassificationResolvable) -> DynamicClassification:
+def buried(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: resolve(classification, world) if world.options.buried_items.value else {}
 
-def time_sensitive(classification: ClassificationResolvable) -> DynamicClassification:
+def time_sensitive(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: resolve(classification, world) if world.options.time_sensitive.value else {}
 
-def recipe(classification: ClassificationResolvable) -> DynamicClassification:
+def recipe(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: resolve(classification, world) if world.options.scrap_recipes_as_items.value else {}
 
-def funny(classification: ClassificationResolvable) -> DynamicClassification:
+def funny(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: resolve(classification, world) if world.options.funny_setting.value else {}
 
-def upgrade(classification: ClassificationResolvable) -> DynamicClassification:
+def upgrade(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: {k: v for k, v in resolve(classification, world).items() if world.options.upgrades_as_items.value == UpgradesAsItems.option_all or world.options.upgrades_as_items.value == UpgradesAsItems.option_useful and (k & IC.progression or k & IC.useful)}
 
-def module(classification: ClassificationResolvable) -> DynamicClassification:
+def module(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: {k: v for k, v in resolve(classification, world).items() if world.options.physical_modules_as_items.value == PhysicalModulesAsItems.option_all or world.options.physical_modules_as_items.value == PhysicalModulesAsItems.option_useful and (k & IC.progression or k & IC.useful)}
 
-def atv_upgrade(classification: ClassificationResolvable) -> DynamicClassification:
+def atv_upgrade(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: {k: v for k, v in resolve(classification, world).items() if world.options.atv_upgrades_as_items.value == ATVUpgradesAsItems.option_all or world.options.atv_upgrades_as_items.value == ATVUpgradesAsItems.option_useful and (k & IC.progression or k & IC.useful)}
 
-def plus(*args: ClassificationResolvable) -> DynamicClassification:
+def plus(*args: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: {
         k: sum(resolve(x, world)[k] if k in resolve(x, world) else 0 for x in args)
         for k in reduce(lambda acc, x: {*acc, *resolve(x, world).keys()}, args, set())
@@ -520,6 +534,8 @@ extra_items = {
     "Hiking Boots":                                     ExtraItem({IC.progression: 1}),
     "Lighter":                                          ExtraItem({IC.progression: 1}),
     "Cig Pack":                                         ExtraItem({IC.progression: 1}),
+    "Sponge":                                           ExtraItem(lambda world: {IC.progression: 1} if world.options.maintenance_tasks.value else {}),
+    "Fuse":                                             ExtraItem(lambda world: {IC.progression: 10} if world.options.fuse_replacement_locations.value else {}),
     "Crowbar":                                          ExtraItem(lambda world: {(IC.progression if world.options.chicken_sandwiches.value else IC.useful): 1}),
     "Day":                                              ExtraItem(lambda world: {IC.progression: 50} if world.options.day_as_items.value else {}),
 
@@ -529,6 +545,7 @@ extra_items = {
 
     # "Lead Pipe":                                        ExtraItem({IC.useful: 1}),
     "Axe":                                              ExtraItem({IC.useful: 1}),
+    "Gas Can":                                          ExtraItem({IC.useful: 1}),
     "Bike Helmet":                                      ExtraItem({IC.useful: 1}),
     "Digital Map":                                      ExtraItem({IC.useful: 1}),
     "Progressive Processing Speed":                     ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
@@ -615,6 +632,12 @@ extra_items = {
     "Jacket":                                           ExtraItem({IC.filler: 2}),
     "Compost Bucket":                                   ExtraItem({IC.filler: 2}),
     "Green Fire Rock":                                  ExtraItem(time_sensitive({IC.filler: 1})),
+    "Broom":                                            ExtraItem({IC.filler: 2}),
+    "Pipebomb":                                         ExtraItem({IC.filler: 1}),
+    "Welding Mask":                                     ExtraItem({IC.filler: 2}),
+    "Boar Trophy Head":                                 ExtraItem({IC.filler: 1}),
+    "Deer Trophy Head":                                 ExtraItem({IC.filler: 1}),
+    "Goat Trophy Head":                                 ExtraItem({IC.filler: 1}),
     "Bonus Points":                                     ExtraItem({IC.filler: 1}),
 
     # Previously shuffled, but I think it's better to just have the player keep them when found
