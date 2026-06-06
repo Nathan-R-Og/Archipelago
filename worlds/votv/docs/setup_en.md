@@ -5,8 +5,8 @@
 - [Voices of the Void](https://mrdrnose.itch.io/votv), version 0.9j.
 - UE4SS, the mod framework used for the client. The mod requires the [experimental version](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/experimental-latest) to work correctly. Instructions on installation are [here](https://docs.ue4ss.com/dev/installation-guide.html#method-1---basic-install).
     - If you are on Linux using Wine or Proton, you might also need to use the following launch command for UE4SS to be injected correctly: `WINEDLLOVERRIDES="dwmapi.dll=n,b" %command%`.
-- The [client mod](https://github.com/Nathan-R-Og/votv_ap). Download it as a ZIP (under the green Code button), and extract it into your UE4SS Mods folder.
-    - Your final setup should look like `WindowsNoEditor/VotV/Binaries/Win64/Mods/votv_ap-main`, which contains a folder named Scripts and a file named enabled.txt
+- The [client mod](https://github.com/Nathan-R-Og/Archipelago/releases/tag/votv-v0.0.2). Download it and extract it into your UE4SS Mods folder.
+    - Your final setup should look like `WindowsNoEditor/VotV/Binaries/Win64/ue4ss/Mods/votv_ap-main`, which contains a folder named Scripts and a file named enabled.txt
 - The built-in Archipelago client, which can be installed [here](https://github.com/ArchipelagoMW/Archipelago/releases).
 
 ## Configuring your YAML file
