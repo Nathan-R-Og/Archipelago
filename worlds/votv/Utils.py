@@ -1,12 +1,12 @@
-from typing import Callable, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING, TypeVar
 
-from .Options import ArgemiaPlushes
 from .Types import VOTVGoal
 
 if TYPE_CHECKING:
     from . import VOTVWorld
 
-def resolve[T](value: T | Callable[["VOTVWorld"], T], world: "VOTVWorld") -> T:
+T = TypeVar('T')
+def resolve(value: T | Callable[["VOTVWorld"], T], world: "VOTVWorld") -> T:
     return value(world) if callable(value) else value  # type: ignore
 
 def is_goal_enabled(world: "VOTVWorld", goal: VOTVGoal):

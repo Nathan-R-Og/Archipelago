@@ -20,7 +20,7 @@ from typing import Dict
 from worlds.votv.Types import VOTVItem
 
 from .Locations import get_location_groups, get_location_names, get_total_locations
-from .Items import create_items, create_itempool, item_table
+from .Items import create_itempool, item_table
 from .Options import VOTVOptions, create_option_groups
 from .Regions import create_regions
 from .Rules import set_rules
