@@ -13,9 +13,11 @@
 from functools import reduce
 import logging
 
-from BaseClasses import MultiWorld, Item, Tutorial
+from BaseClasses import ItemClassification, MultiWorld, Item, Tutorial
 from worlds.AutoWorld import World, CollectionState, WebWorld
 from typing import Dict
+
+from worlds.votv.Types import VOTVItem
 
 from .Locations import get_location_groups, get_location_names, get_total_locations
 from .Items import create_items, create_itempool, item_table
@@ -122,7 +124,8 @@ class VOTVWorld(World):
     # ahit does similar if you want another look and bomb rush cyberfunk does it in a slightly different way by turning it into a specific item for that game
     # Again hopefully I do a better job of explaining the Items.py file
     def create_item(self, name: str) -> Item:
-        return create_items(self, name)[0]
+        item = item_table[name]
+        return VOTVItem(name, ItemClassification.filler, item.ap_code, self.player)
 
     def get_filler_item_name(self) -> str:
         return "Bonus Points"
