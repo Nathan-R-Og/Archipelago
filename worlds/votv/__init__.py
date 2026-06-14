@@ -25,6 +25,7 @@ from .Options import VOTVOptions, create_option_groups
 from .Regions import create_regions
 from .Rules import set_rules
 from .data.location_data import locations
+from .data.item_data import shop_items
 
 # This is where you setup the page on the site!
 # Typically is the name of your game with web
@@ -171,6 +172,7 @@ class VOTVWorld(World):
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
             "ItemNames": reduce(lambda acc, x: {**acc, x: (acc[x] if x in acc else 0) + 1}, item_names, {}),  # unique names of all the items in our pool
+            "ShopItems": {x: True for x in item_names if x in shop_items},  # unique names of all the items that should stay in the shop
             "TotalLocations": get_total_locations(self)  # get_total_locations(self) comes from Locations.py
         }
 

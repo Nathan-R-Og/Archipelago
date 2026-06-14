@@ -131,8 +131,8 @@ class BonusPointsChance(Range):
     If there are more locations than items, remaining slots will always be filled with Bonus Points.
     """
     display_name = "Bonus Points Chance"
-    min = 0
-    max = 100
+    range_start = 0
+    range_end = 100
     default = 0
 
 class BonusPointsAmount(Range):

@@ -66,6 +66,7 @@ locations = {
     # "Lead Pipe":                        LocationInfo("In the first vent above when entering the Signal Room", rule=Has("Half Hook")),
     "Miniature Gas Can":                LocationInfo("On top of the garage in a corner", "Alpha Base"),
     "Alpha Toolbox":                    LocationInfo("", "Alpha Base"),
+    "ATV Wheel":                        LocationInfo("", "Alpha Base"),
     "Ammo Box":                         LocationInfo("Behind the crates in the garage", "Alpha Base"),
     "Alpha Broom":                      LocationInfo("In the utility closet", "Alpha Base"),
     "Pipebomb":                         LocationInfo("In the corner drawer in the signal room", "Alpha Base"),
