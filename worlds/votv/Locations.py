@@ -38,7 +38,7 @@ def get_location_groups() -> dict[str, set[str]]:
 # I know it looks like the same as when we counted it but thats because this is an example
 # Things get complicated fast so having a back up is nice
 def is_valid_location(world: "VOTVWorld", name: str) -> bool:
-    if name.startswith("Purchase") and not world.options.shop_items.value:
+    if name.startswith("Purchase"):  # and not world.options.shop_items.value
         return False
 
     if name not in locations:

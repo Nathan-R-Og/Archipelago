@@ -27,6 +27,7 @@ class ShopItem(NamedTuple):
                 return False
         return True
 
+# CURRENTLY DISABLED due to technical limitations in the mod
 shop_items = {
     "Drive": ShopItem(2, 1, "drive", IC.useful),
     "Drive box": ShopItem(5, 5, "box_p", IC.useful),

@@ -240,11 +240,11 @@ class RockCandles(DefaultOffToggle):
     """
     display_name = "Rock Candles As Locations"
 
-class ShopItems(DefaultOffToggle):
-    """
-    Determines if purchasing shop items are locations.
-    """
-    display_name = "Shop Items As Locations"
+# class ShopItems(DefaultOffToggle):
+#     """
+#     Determines if purchasing shop items are locations.
+#     """
+#     display_name = "Shop Items As Locations"
 
 class ChickenSandwiches(DefaultOnToggle):
     """
@@ -348,7 +348,7 @@ class VOTVOptions(PerGameCommonOptions):
     maintenance_tasks:              MaintenanceTasks
     cooking_tasks:                  CookingTasks
     rock_candles:                   RockCandles
-    shop_items:                     ShopItems
+    # shop_items:                     ShopItems
     chicken_sandwiches:             ChickenSandwiches
     buried_items:                   BuriedItems
     time_sensitive:                 TimeSensitive
@@ -389,7 +389,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         MaintenanceTasks,
         CookingTasks,
         RockCandles,
-        ShopItems,
+        # ShopItems,
         ChickenSandwiches,
         BuriedItems,
         TimeSensitive,

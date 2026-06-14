@@ -151,7 +151,7 @@ class VOTVWorld(World):
                 "ServerRepairLocations":        self.options.server_repair_locations.value,
                 "TransformerRepairLocations":   self.options.transformer_repair_locations.value,
                 "TrashBagsLocations":           self.options.trash_bags_locations.value,
-                "ShopItems":                    self.options.shop_items.value,
+                # "ShopItems":                    self.options.shop_items.value,
                 "TimeSensitive":                self.options.time_sensitive.value,
                 "FunnySetting":                 self.options.funny_setting.value,
                 "KerfurOmegaEnabled":           self.options.kerfur_omega_enabled.value,

@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 
 def is_valid_item(world: "VOTVWorld", name: str, classification: int) -> ItemClassification | None:
     if name in shop_items:
+        return None
+
         if not world.options.shop_items.value:
             return None
 
