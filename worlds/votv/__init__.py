@@ -18,6 +18,7 @@ from worlds.AutoWorld import World, CollectionState, WebWorld
 from typing import Dict
 
 from worlds.votv.Types import VOTVItem
+from worlds.votv.Utils import resolve
 
 from .Locations import get_location_groups, get_location_names, get_total_locations
 from .Items import create_itempool, item_table
@@ -25,7 +26,7 @@ from .Options import VOTVOptions, create_option_groups
 from .Regions import create_regions
 from .Rules import set_rules
 from .data.location_data import locations
-from .data.item_data import shop_items
+from .data.shop_item_data import shop_items
 
 # This is where you setup the page on the site!
 # Typically is the name of your game with web
@@ -126,7 +127,8 @@ class VOTVWorld(World):
     # Again hopefully I do a better job of explaining the Items.py file
     def create_item(self, name: str) -> Item:
         item = item_table[name]
-        return VOTVItem(name, ItemClassification.filler, item.ap_code, self.player)
+        classification = resolve(item.classification, self)
+        return VOTVItem(name, ItemClassification.filler if len(classification) == 0 else next(iter(classification.keys())), item.ap_code, self.player)
 
     def get_filler_item_name(self) -> str:
         return "Bonus Points"
@@ -168,7 +170,7 @@ class VOTVWorld(World):
                 "TrapChance":                   self.options.trap_chance.value,
                 "RockCandles":                  self.options.rock_candles.value
             },
-            "Version": [0, 3, 0],
+            "Version": [0, 4, 0],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
             "ItemNames": reduce(lambda acc, x: {**acc, x: (acc[x] if x in acc else 0) + 1}, item_names, {}),  # unique names of all the items in our pool

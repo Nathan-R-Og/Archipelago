@@ -155,8 +155,8 @@ locations = {
 
     "Bowtie 1":                         LocationInfo("In the New Trees area", "Misc"),
     "Bowtie 2":                         LocationInfo("In the New Trees area", "Misc"),
-    "Glasses 1":                        LocationInfo("At the Green Hatch", "Misc"),
-    "Glasses 2":                        LocationInfo("At the Green Hatch", "Misc"),
+    "Glasses 1":                        LocationInfo("At the Green Hatch", "Green Hatch"),
+    "Glasses 2":                        LocationInfo("At the Green Hatch", "Green Hatch"),
     "Badge 1":                          LocationInfo("At the Hole", "The Hole"),
     "Badge 2":                          LocationInfo("At the Hole", "The Hole"),
     "Jacket 1":                         LocationInfo("At the Hole", "The Hole"),
@@ -176,8 +176,8 @@ locations = {
     "Maid Outfit":                      LocationInfo("Buried near the light post on the last turn to TR3", "Misc", enabled=lambda world: funny(world) and buried(world), rule=Has("Shovel")),
 
     **{f"Survive Day {i+1}":            LocationInfo("", "Tasks",
-        enabled=lambda world, n=i: n < (world.options.survive_day.value if world.options.objective.value == VOTVGoal.SURVIVE else world.options.survive_days_locations.value),
-        rule=Has("Day", i, options=[OptionFilter(DayAsItems, True)], filtered_resolution=True),
+        enabled=lambda world, n=i: world.options.objective.value == VOTVGoal.SURVIVE and n == world.options.survive_day.value - 1 or n < world.options.survive_days_locations.value and (world.options.objective.value != VOTVGoal.SURVIVE or n < world.options.survive_day.value),
+        rule=Has("Day", i+1, options=[OptionFilter(DayAsItems, True)], filtered_resolution=True),
         world_item_tier=WorldItems.option_none
     ) for i in range(max_days)},
     **{f"Sell Level {j} Signal {i+1}":  LocationInfo("", "Tasks",

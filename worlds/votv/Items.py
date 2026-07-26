@@ -5,7 +5,8 @@ from .Utils import resolve
 from .Types import ItemData, VOTVGoal, VOTVItem
 from .Locations import get_total_locations
 from .Constants import allowed_unlocks
-from .data.item_data import shop_items, extra_items, goal_items
+from .data.item_data import extra_items, goal_items
+from .data.shop_item_data import shop_items
 
 if TYPE_CHECKING:
     from . import VOTVWorld

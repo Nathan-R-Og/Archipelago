@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from .Types import LocData
 from .Constants import allowed_unlocks
-from .data.item_data import shop_items
+from .data.shop_item_data import shop_items
 from .data.location_data import locations
 
 if TYPE_CHECKING:
