@@ -185,7 +185,11 @@ locations = {
         rule=Has("Progressive Processing Level", j, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True),
         world_item_tier=WorldItems.option_none
     ) for j in range(4) for i in range(max_signal_locations)},
-    **{f"Daily Task Done {i+1}":        LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.daily_task_locations.value, world_item_tier=WorldItems.option_none) for i in range(max_daily_tasks_locations)},
+    **{f"Daily Task Done {i+1}":        LocationInfo("", "Tasks",
+        enabled=lambda world, n=i: n < world.options.daily_task_locations.value,
+        rule=Has("Day", options=[OptionFilter(DayAsItems, True)], filtered_resolution=True),  # There's no daily taks on the first day. This assumes you start on day 1 (the whole world does tbh)
+        world_item_tier=WorldItems.option_none
+    ) for i in range(max_daily_tasks_locations)},
     **{f"Repair Server {i+1}":          LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.server_repair_locations.value, world_item_tier=WorldItems.option_none) for i in range(max_server_repair_locations)},
     **{f"Repair Transformer {i+1}":     LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.transformer_repair_locations.value, world_item_tier=WorldItems.option_none) for i in range(max_transformer_repair_locations)},
     **{f"Replace Fuse {i+1}":           LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.fuse_replacement_locations.value, world_item_tier=WorldItems.option_none, rule=Has("Fuse", count=min(i+1, 10))) for i in range(max_fuse_replacement_locations)},
@@ -193,9 +197,9 @@ locations = {
     **{f"Light the {dir} Candle":       LocationInfo("", "Tasks", enabled=candles, rule=Has("Lighter"), world_item_tier=WorldItems.option_none) for dir in ('North', 'Northwest', 'West', 'Southwest', 'South', 'Southeast', 'East', 'Northeast')},
 
     "Repair the Oven":                  LocationInfo("", "Alpha Base", enabled=maintenance, world_item_tier=WorldItems.option_none),
-    "Clean the Toilet":                 LocationInfo("", "Alpha Base", enabled=maintenance, world_item_tier=WorldItems.option_none),
-    "Clean the Sink":                   LocationInfo("", "Alpha Base", enabled=maintenance, world_item_tier=WorldItems.option_none),
-    "Clean the Shower":                 LocationInfo("", "Alpha Base", enabled=maintenance, world_item_tier=WorldItems.option_none),
+    "Clean the Toilet":                 LocationInfo("", "Alpha Base", enabled=maintenance, rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
+    "Clean the Sink":                   LocationInfo("", "Alpha Base", enabled=maintenance, rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
+    "Clean the Shower":                 LocationInfo("", "Alpha Base", enabled=maintenance, rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
     "Bake Cookies":                     LocationInfo("", "Alpha Base", enabled=cooking, world_item_tier=WorldItems.option_none),
     "Bake Bread":                       LocationInfo("", "Alpha Base", enabled=cooking, world_item_tier=WorldItems.option_none),
     "Bake a Pizza":                     LocationInfo("", "Alpha Base", enabled=cooking, world_item_tier=WorldItems.option_none),

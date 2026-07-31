@@ -109,20 +109,20 @@ def plus(*args: "ClassificationResolvable") -> "DynamicClassification":
 
 goal_items = {
     "Metal Detector":                   ExtraItem(lambda world: {IC.progression: 1} if world.options.buried_items.value else goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})(world)),
-    "Kerfur-Omega Complete Manual":     ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
+    "Kerfur-Omega Complete Manual":     ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
     "Red Kerfur":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
     "Blue Kerfur":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
     "Pink Kerfur":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
-    "Omega AI Module":                  ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
-    "Ball Joint":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, buried({IC.filler: 12}))),
-    "Limb Joint":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 6})),
-    "Progressive Camera":               ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 3})),
+    "Omega AI Module":                  ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
+    "Ball Joint":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, buried({IC.useful: 8, IC.filler: 4}))),
+    "Limb Joint":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 4, IC.filler: 2})),
+    "Progressive Camera":               ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 3})),
     "Hacksaw":                          ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
     "Pickaxe":                          ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
-    "Hazmat Suit":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
+    "Hazmat Suit":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
     "Gas Welder":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 3})),
     "Radioactive Capsule Blueprint":    ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
-    "Radioactive Capsule":              ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
+    "Radioactive Capsule":              ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
 
     "Skull":                            ExtraItem(goal_item({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, plus({IC.filler: 5}, buried({IC.filler: 2})))),
 
@@ -136,10 +136,10 @@ goal_items = {
 
     "Balloon Pack (WIP)":               ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
     "Fire Rune":                        ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
-    "Earth Rune":                       ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
+    "Earth Rune":                       ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, buried(time_sensitive({IC.filler: 1})))),
     "Water Rune":                       ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
     "Air Rune":                         ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
-    "Ritual Knife":                     ExtraItem(lambda world: {IC.progression: 1} if furfur_plush_enabled(world) else goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})(world)),
+    "Ritual Knife":                     ExtraItem(lambda world: {IC.progression: 1} if furfur_plush_enabled(world) else goal_item({VOTVGoal.LAMBERT_PLUSH}, time_sensitive({IC.filler: 1}))(world)),
 
     "Tile":                             ExtraItem(goal_item({VOTVGoal.GREEN_CABINET}, {IC.filler: 9}))
 }
