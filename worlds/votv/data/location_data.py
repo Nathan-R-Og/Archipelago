@@ -86,7 +86,7 @@ locations = {
 
     "Hole Toolbox":                     LocationInfo("", "The Hole"),
     "EMF Detector":                     LocationInfo("At the Hole, near a fallen construction light", "The Hole", enabled=buried, rule=HasAll("Shovel", "Metal Detector")),
-    "Lantern":                          LocationInfo("At the Hole", "The Hole"),
+    # "Lantern":                          LocationInfo("At the Hole", "The Hole"),
     "Hole Welding Mask":                LocationInfo("", "The Hole"),
 
     "Green Hatch Toolbox":              LocationInfo("", "Green Hatch"),

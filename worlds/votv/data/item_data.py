@@ -231,7 +231,7 @@ extra_items = {
     "Kerfur-Omega Documents Binder":                    ExtraItem({IC.filler: 1}),
     "Geiger Counter":                                   ExtraItem({IC.filler: 1}),
     "EMF Detector":                                     ExtraItem(buried({IC.filler: 1})),
-    "Lantern":                                          ExtraItem({IC.filler: 1}),
+    # "Lantern":                                          ExtraItem({IC.filler: 1}),
     "Watering Can":                                     ExtraItem({IC.filler: 3}),
     "Deer Skull":                                       ExtraItem({IC.filler: 1}),
     "Antibreather Plush":                               ExtraItem(time_sensitive({IC.filler: 1})),
