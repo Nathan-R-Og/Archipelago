@@ -62,6 +62,7 @@ locations = {
     "Medkit":                           LocationInfo("In the Administration Office", "Alpha Base"),
     "Car Keys":                         LocationInfo("In the Administration Office", "Alpha Base"),
     "Cooking Book":                     LocationInfo("In the living quarters", "Alpha Base"),
+    "Shrimp Pack":                      LocationInfo("In the fridge", "Alpha Base", enabled=argemia_plush(ArgemiaPlushes.option_rgbycm)),
     # Disabled because it requires a specific event that might be skipped
     # "Lead Pipe":                        LocationInfo("In the first vent above when entering the Signal Room", rule=Has("Half Hook")),
     "Miniature Gas Can":                LocationInfo("On top of the garage in a corner", "Alpha Base"),
