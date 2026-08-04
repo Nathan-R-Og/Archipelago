@@ -27,12 +27,11 @@ def furfur_plush_enabled(world: "VOTVWorld"):
     return bool(world.options.buried_items.value and world.options.time_sensitive.value)
 
 def day_item_count(world: "VOTVWorld"):
-    return (
-        world.options.survive_day.value if world.options.objective == VOTVGoal.SURVIVE else max(
-            world.options.survive_days_locations.value,
-            7 if world.options.time_sensitive.value else 0,  # Green Fire Rock is only obtainable on Day 8+
-            1 if world.options.daily_task_locations.value else 0
-        )
+    return max(
+        world.options.survive_days_locations.value,
+        world.options.survive_day.value if world.options.objective == VOTVGoal.SURVIVE else 0,
+        7 if world.options.time_sensitive.value else 0,  # Green Fire Rock is only obtainable on Day 8+
+        1 if world.options.daily_task_locations.value else 0
     )
 
 @dataclass(frozen=True)
