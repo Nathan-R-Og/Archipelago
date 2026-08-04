@@ -4,9 +4,8 @@ from typing import TYPE_CHECKING, Callable, NamedTuple
 from BaseClasses import ItemClassification as IC
 
 from ..Options import ATVUpgradesAsItems, ArgemiaPlushes, PhysicalModulesAsItems, UpgradesAsItems, WorldItems
-from ..Utils import furfur_plush_enabled, is_goal_enabled, resolve
+from ..Utils import day_item_count, furfur_plush_enabled, is_goal_enabled, resolve
 from ..Types import VOTVGoal
-from ..Constants import max_days
 
 if TYPE_CHECKING:
     from .. import VOTVWorld
@@ -80,6 +79,9 @@ def recipe(classification: "ClassificationResolvable") -> "DynamicClassification
 def funny(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: resolve(classification, world) if world.options.funny_setting.value else {}
 
+def door(classification: "ClassificationResolvable") -> "DynamicClassification":
+    return lambda world: resolve(classification, world) if world.options.doors_as_items.value else {}
+
 def upgrade(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: {
         k: v for k, v in resolve(classification, world).items()
@@ -107,6 +109,9 @@ def plus(*args: "ClassificationResolvable") -> "DynamicClassification":
         for k in reduce(lambda acc, x: {*acc, *resolve(x, world).keys()}, args, set())
     }
 
+def crafted_capsule(amount: int) -> "DynamicClassification":
+    return lambda world: {IC.progression: 1, IC.filler: amount - 1} if world.options.enable_crafted_capsule.value else {IC.filler: amount}
+
 goal_items = {
     "Metal Detector":                   ExtraItem(lambda world: {IC.progression: 1} if world.options.buried_items.value else goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})(world)),
     "Kerfur-Omega Complete Manual":     ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
@@ -117,11 +122,11 @@ goal_items = {
     "Ball Joint":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, buried({IC.useful: 8, IC.filler: 4}))),
     "Limb Joint":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 4, IC.filler: 2})),
     "Progressive Camera":               ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 3})),
-    "Hacksaw":                          ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
-    "Pickaxe":                          ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
-    "Hazmat Suit":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
-    "Gas Welder":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 3})),
-    "Radioactive Capsule Blueprint":    ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.filler: 1})),
+    "Hacksaw":                          ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, crafted_capsule(1))),
+    "Pickaxe":                          ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, crafted_capsule(1))),
+    "Hazmat Suit":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, crafted_capsule(1))),
+    "Gas Welder":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, crafted_capsule(3))),
+    "Radioactive Capsule Blueprint":    ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, crafted_capsule(1))),
     "Radioactive Capsule":              ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
 
     "Skull":                            ExtraItem(goal_item({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, plus({IC.filler: 5}, buried({IC.filler: 2})))),
@@ -132,9 +137,9 @@ goal_items = {
     "Yellow Argemia Plush":             ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
     "Magenta Argemia Plush":            ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
     "Cyan Argemia Plush":               ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
-    "Shrimp Pack":                      ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.useful: 17}))),
+    "Shrimp Pack":                      ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.progression: 17}))),
 
-    "Balloon Pack (WIP)":               ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
+    "Balloon Pack (WIP)":               ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.progression: 1})),
     "Fire Rune":                        ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
     "Earth Rune":                       ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, buried(time_sensitive({IC.filler: 1})))),
     "Water Rune":                       ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
@@ -145,7 +150,25 @@ goal_items = {
 }
 
 extra_items = {
-    "Half Hook":                                        ExtraItem({IC.progression: 1, IC.useful: 1}),
+    "Alpha Base Entrance":                              ExtraItem(door({IC.progression: 1})),
+    "Signal Lab Entrance":                              ExtraItem(door({IC.progression: 1})),
+    "Server Room Entrance":                             ExtraItem(door({IC.progression: 1})),
+    "Garage Entrance":                                  ExtraItem(door({IC.progression: 1})),
+    "Admin Room Entrance":                              ExtraItem(door({IC.progression: 1})),
+    "Break Room Entrance":                              ExtraItem(door({IC.progression: 1})),
+    "Utility Closet Entrance":                          ExtraItem(door({IC.progression: 1})),
+    "Alpha Stairs Entrance":                            ExtraItem(door({IC.progression: 1})),
+    "Storage Room Entrance":                            ExtraItem(door({IC.progression: 1})),
+    "Staff Room Entrance":                              ExtraItem(door({IC.progression: 1})),
+    "Bathroom Entrance":                                ExtraItem(door({IC.progression: 1})),
+    "Alpha Roof Entrance":                              ExtraItem(door({IC.progression: 1})),
+    "Bunker Entrance":                                  ExtraItem(door({IC.progression: 1})),
+
+    "TR1 Room Entrance":                                ExtraItem(door({IC.progression: 1})),
+    "TR2 Room Entrance":                                ExtraItem(door({IC.progression: 1})),
+    "TR3 Room Entrance":                                ExtraItem(door({IC.progression: 1})),
+
+    "Half Hook":                                        ExtraItem({IC.progression: 2}),
     "Shovel":                                           ExtraItem({IC.progression: 1, IC.useful: 3}),
     "Bunker Keycard":                                   ExtraItem({IC.progression: 1}),
     "Scuba Mask":                                       ExtraItem({IC.progression: 1}),
@@ -162,7 +185,7 @@ extra_items = {
     "Sponge":                                           ExtraItem(lambda world: {IC.progression: 1} if world.options.maintenance_tasks.value else {}),
     "Fuse":                                             ExtraItem(lambda world: {IC.progression: 10} if world.options.fuse_replacement_locations.value else {}),
     "Crowbar":                                          ExtraItem(lambda world: {(IC.progression if world.options.chicken_sandwiches.value else IC.useful): 1}),
-    "Day":                                              ExtraItem(lambda world: {IC.progression: min(world.options.survive_days_locations.value, world.options.survive_day.value if world.options.objective == VOTVGoal.SURVIVE else max_days)} if world.options.day_as_items.value else {}),
+    "Day":                                              ExtraItem(lambda world: {IC.progression: day_item_count(world)} if world.options.day_as_items.value else {}),
 
     "Furfur Altar Leg 1":                               ExtraItem(lambda world: time_sensitive({(IC.progression if furfur_plush_enabled(world) else IC.filler): 1})(world)),
     "Furfur Altar Leg 2":                               ExtraItem(lambda world: buried({(IC.progression if furfur_plush_enabled(world) else IC.filler): 1})(world)),

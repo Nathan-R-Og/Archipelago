@@ -57,11 +57,11 @@ for item_name in shop_items.keys():
     item = shop_items[item_name]
     if not item.checkUnlock(allowed_unlocks):
         continue
-    votv_locations[f"Purchase {item_name}"] = LocData(current_id, "World")
+    votv_locations[f"Purchase {item_name}"] = LocData(current_id, "Signal Lab")
     current_id += 1
 
 for name, info in locations.items():
-    votv_locations[name] = LocData(current_id, "World")
+    votv_locations[name] = LocData(current_id, info.region)
     current_id += 1
 
 # from .data.achievement_data import *

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from .Types import VOTVLocation
 from .Locations import location_table, is_valid_location
+from .data.region_data import regions
 
 if TYPE_CHECKING:
     from . import VOTVWorld
@@ -18,7 +19,17 @@ def create_regions(world: "VOTVWorld"):
 
     # You can technically name your connections whatever you want as well
     # You'll use those connection names in Rules.py
-    r_world = create_region(world, "World")
+    for name in regions.keys():
+        create_region(world, name)
+
+    for name, data in regions.items():
+        for exit in data.exits:
+            from_reg = world.get_region(name)
+            to_reg = world.get_region(exit.connected_region)
+            from_reg.connect(to_reg, exit.name, exit.access_rule)
+            if exit.two_way:
+                to_reg.connect(from_reg, exit.name + " Reverse", exit.access_rule)
+
 
 def create_region(world: "VOTVWorld", name: str) -> Region:
     reg = Region(name, world.player, world.multiworld)

@@ -124,6 +124,12 @@ class WorldItems(Choice):
     """All items found in the world"""
     default = 1
 
+class DoorsAsItems(DefaultOffToggle):
+    """
+    Determines if doors started jammed and have to be found.
+    """
+    display_name = "Doors As Items"
+
 class BonusPointsChance(Range):
     """
     Determines the chance for any junk item to become Bonus Points.
@@ -335,6 +341,7 @@ class VOTVOptions(PerGameCommonOptions):
     physical_modules_as_items:      PhysicalModulesAsItems
     atv_upgrades_as_items:          ATVUpgradesAsItems
     # world_items:                    WorldItems
+    doors_as_items:                 DoorsAsItems
     bonus_points_chance:            BonusPointsChance
     bonus_points_amount:            BonusPointsAmount
     survive_days_locations:         SurviveDayLocations
@@ -376,6 +383,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         PhysicalModulesAsItems,
         ATVUpgradesAsItems,
         # WorldItems,
+        DoorsAsItems,
         BonusPointsChance,
         BonusPointsAmount,
         SurviveDayLocations,

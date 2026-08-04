@@ -79,7 +79,7 @@ class VOTVWorld(World):
 
     item_pool: list[Item]
 
-    origin_region_name: str = "World"
+    origin_region_name: str = "Outside"
 
     # There are other built in variables for AP. You can look at other worlds to see your options
     # Like PLEASE look at the various worlds. Its so helpful. Find one you like and you can duplicate a bunch of it
@@ -168,9 +168,10 @@ class VOTVWorld(World):
                 "BuriedItems":                  self.options.buried_items.value,
                 "ArgemiaPlushes":               self.options.argemia_plushes.value,
                 "TrapChance":                   self.options.trap_chance.value,
-                "RockCandles":                  self.options.rock_candles.value
+                "RockCandles":                  self.options.rock_candles.value,
+                "DoorsAsItems":                 self.options.doors_as_items.value,
             },
-            "Version": [0, 4, 0],
+            "Version": [0, 5, 0],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
             "ItemNames": reduce(lambda acc, x: {**acc, x: (acc[x] if x in acc else 0) + 1}, item_names, {}),  # unique names of all the items in our pool
