@@ -63,7 +63,6 @@ locations = {
     "Medkit":                           LocationInfo("In the Administration Office", "Alpha Base", region="Admin Room"),
     "Car Keys":                         LocationInfo("In the Administration Office", "Alpha Base", region="Admin Room"),
     "Cooking Book":                     LocationInfo("In the living quarters", "Alpha Base", region="Staff Room"),
-    "Shrimp Pack":                      LocationInfo("In the fridge", "Alpha Base", enabled=argemia_plush(ArgemiaPlushes.option_rgbycm), region="Staff Room"),
     # Disabled because it requires a specific event that might be skipped
     # "Lead Pipe":                        LocationInfo("In the first vent above when entering the Signal Room", region="Signal Lab", rule=Has("Half Hook")),
     "Miniature Gas Can":                LocationInfo("On top of the garage in a corner", "Alpha Base", region="Alpha Roof"),
@@ -185,13 +184,13 @@ locations = {
     **{f"Sell Level {j} Signal {i+1}":  LocationInfo("", "Tasks",
         enabled=lambda world, n=i: n < world.options.signal_locations.value,
         rule=Has("Progressive Processing Level", j, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True)
-             & CanReachRegion("Signal Lab") & CanReachRegion("Garage"),
+             & CanReachRegion("Signal Lab") & CanReachRegion("Garage") & CanReachRegion("Alpha Stairs"),
         world_item_tier=WorldItems.option_none
     ) for j in range(4) for i in range(max_signal_locations)},
     **{f"Daily Task Done {i+1}":        LocationInfo("", "Tasks",
         enabled=lambda world, n=i: n < world.options.daily_task_locations.value,
         rule=Has("Day", DayItemFieldResolver(1), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True)  # There's no daily taks on the first day. This assumes you start on day 1 (the whole world does tbh)
-             & CanReachRegion("Signal Lab") & CanReachRegion("Garage"),
+             & CanReachRegion("Signal Lab") & CanReachRegion("Garage") & CanReachRegion("Alpha Stairs"),
         world_item_tier=WorldItems.option_none
     ) for i in range(max_daily_tasks_locations)},
     **{f"Repair Server {i+1}":          LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.server_repair_locations.value, world_item_tier=WorldItems.option_none) for i in range(max_server_repair_locations)},
@@ -199,7 +198,7 @@ locations = {
     **{f"Replace Fuse {i+1}":           LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.fuse_replacement_locations.value, world_item_tier=WorldItems.option_none, rule=Has("Fuse", count=min(i+1, 10))) for i in range(max_fuse_replacement_locations)},
     **{f"Sell 24 Full Trash Bags {i+1}": LocationInfo("", "Tasks",
         enabled=lambda world, n=i: n < world.options.trash_bags_locations.value,
-        rule=CanReachRegion("Signal Lab") & CanReachRegion("Garage"),
+        rule=CanReachRegion("Signal Lab") & CanReachRegion("Garage") & CanReachRegion("Alpha Stairs"),
         world_item_tier=WorldItems.option_none, region="Garage"
     ) for i in range(max_trash_cleaning_locations)},
     **{f"Light the {dir} Candle":       LocationInfo("", "Tasks", enabled=candles, rule=Has("Lighter"), world_item_tier=WorldItems.option_none) for dir in ('North', 'Northwest', 'West', 'Southwest', 'South', 'Southeast', 'East', 'Northeast')},
@@ -208,9 +207,9 @@ locations = {
     "Clean the Toilet":                 LocationInfo("", "Alpha Base", enabled=maintenance, region="Bathroom", rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
     "Clean the Sink":                   LocationInfo("", "Alpha Base", enabled=maintenance, region="Bathroom", rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
     "Clean the Shower":                 LocationInfo("", "Alpha Base", enabled=maintenance, region="Bathroom", rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
-    "Bake Cookies":                     LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", world_item_tier=WorldItems.option_none),
-    "Bake Bread":                       LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", world_item_tier=WorldItems.option_none),
-    "Bake a Pizza":                     LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", world_item_tier=WorldItems.option_none),
+    "Bake Cookies":                     LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
+    "Bake Bread":                       LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
+    "Bake a Pizza":                     LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
 
     **{f"Ball Joints Box {i+1}":        LocationInfo("In the gravel pile near Romeo", "Misc", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=buried), rule=HasAll("Shovel", "Metal Detector")) for i in range(6)},
     **{f"TR{i+1} Limb Joints {j+1}":    LocationInfo("", f"TR{i+1}", enabled=goal({VOTVGoal.KERFUR_OMEGA}), region=f"TR{i+1} Room") for i in range(3) for j in range(2)},
@@ -243,6 +242,7 @@ locations = {
     "Air Rune":                         LocationInfo("Send a rock to the top of the map with balloons", "Misc", enabled=goal({VOTVGoal.LAMBERT_PLUSH}), rule=Has("Balloon Pack (WIP)")),
     "Ritual Knife":                     LocationInfo("In the Lambert Ritual dimension, accessible in the Abandoned Shack at 3:33 AM", "Abandoned Shack", enabled=goal({VOTVGoal.LAMBERT_PLUSH}, also=time_sensitive)),
 
+    "Shrimp Pack":                      LocationInfo("In the fridge", "Alpha Base", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Staff Room"),
     "Red Argemia Plush":                LocationInfo("In the hole near the estuary of the river in the top right", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgb))),
     "Blue Argemia Plush":               LocationInfo("In the river between the first two bridges when walking towards the base", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgb))),
     "Green Argemia Plush":              LocationInfo("At the top of the mountain in the bottom left, out of fence", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgb)), rule=HasAny("Hiking Boots", "Half Hook")),

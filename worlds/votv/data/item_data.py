@@ -127,7 +127,7 @@ goal_items = {
     "Hazmat Suit":                      ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, crafted_capsule(1))),
     "Gas Welder":                       ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, crafted_capsule(3))),
     "Radioactive Capsule Blueprint":    ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, crafted_capsule(1))),
-    "Radioactive Capsule":              ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, {IC.useful: 1})),
+    "Radioactive Capsule":              ExtraItem(goal_item({VOTVGoal.KERFUR_OMEGA}, buried({IC.useful: 1}))),
 
     "Skull":                            ExtraItem(goal_item({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, plus({IC.filler: 5}, buried({IC.filler: 2})))),
 
