@@ -300,7 +300,8 @@ extra_items = {
 
     "Ragdoll Trap":                                     ExtraItem({IC.trap: 1}),
     "Breaker Trap":                                     ExtraItem({IC.trap: 1}),
-    "Debug TP Trap":                                    ExtraItem({IC.trap: 1}),
+    # Disabled as it's not that big of a trap and can mess with access to regions
+    # "Debug TP Trap":                                    ExtraItem({IC.trap: 1}),
     "Drunk Trap":                                       ExtraItem({IC.trap: 1}),
     "Points Fine Trap":                                 ExtraItem({IC.trap: 1}),
     "Flat Tire Trap":                                   ExtraItem({IC.trap: 1}),

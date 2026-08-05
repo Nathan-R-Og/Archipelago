@@ -60,6 +60,12 @@ class SurviveDay(Range):
     range_end = 50
     default = 50
 
+class DeathLink(DefaultOffToggle):
+    """
+    Determins if death link is enabled in this run.
+    """
+    display_name = "Death Link"
+
 class DayAsItems(DefaultOffToggle):
     """
     Determines if you need to unlock days as items.
@@ -335,6 +341,7 @@ class VOTVOptions(PerGameCommonOptions):
     objective:                      Objective
     enable_crafted_capsule:         EnableCraftedCapsule
     survive_day:                    SurviveDay
+    death_link:                     DeathLink
     day_as_items:                   DayAsItems
     scrap_recipes_as_items:         ScrapRecipesAsItems
     upgrades_as_items:              UpgradesAsItems
@@ -374,7 +381,8 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
     "Game Options": [
         Objective,
         EnableCraftedCapsule,
-        SurviveDay
+        SurviveDay,
+        DeathLink
     ],
     "Item & Location Options": [
         DayAsItems,

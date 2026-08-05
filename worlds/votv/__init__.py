@@ -45,7 +45,7 @@ class VOTVWeb(WebWorld):
         "English",
         "setup_en.md",
         "setup/en",
-        ["Nathan R."]
+        ["Nathan R.", "Le Codex"]
     )]
 
 # This class is the real meat and potatoes
@@ -170,6 +170,7 @@ class VOTVWorld(World):
                 "TrapChance":                   self.options.trap_chance.value,
                 "RockCandles":                  self.options.rock_candles.value,
                 "DoorsAsItems":                 self.options.doors_as_items.value,
+                "DeathLink":                    self.options.death_link.value
             },
             "Version": [0, 5, 0],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
