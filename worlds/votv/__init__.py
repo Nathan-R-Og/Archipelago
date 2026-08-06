@@ -33,14 +33,14 @@ from .data.shop_item_data import shop_items
 # Whatever you named the folder you are holding all of this in
 class VOTVWeb(WebWorld):
     # Theres a few different themes so have fun with it
-    theme = "stone"
+    theme = "grass"
 
     option_groups = create_option_groups()
 
     # You shouldnt have to change much here except the name at the bottom!
     tutorials = [Tutorial(
         "Multiworld Setup Guide",
-        "A guide to setting up VOTV for Archipelago. "
+        "A guide to setting up VOTV for Archipelago."
         "This guide covers single-player, multiworld, and related software.",
         "English",
         "setup_en.md",
