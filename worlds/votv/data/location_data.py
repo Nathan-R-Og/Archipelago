@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Callable, NamedTuple
 from rule_builder.options import OptionFilter
 from rule_builder.rules import CanReachRegion, Has, HasAll, HasAllCounts, HasAny, HasFromList, Rule
 
-from ..Utils import DayItemFieldResolver, is_goal_enabled, furfur_plush_enabled
+from ..Utils import CanGetSignals, DayItemFieldResolver, is_goal_enabled, furfur_plush_enabled
 from ..Options import ArgemiaPlushes, DayAsItems, ScrapRecipesAsItems, UpgradesAsItems, WorldItems
 from ..Types import VOTVGoal
 from ..Constants import (
@@ -27,6 +27,7 @@ class LocationInfo(NamedTuple):
     rule: Rule | None = None
     enabled: "EnabledFunc" = lambda _: True
     world_item_tier: int | None = WorldItems.option_main
+    complex: bool = False
 
 def goal(goals: set[VOTVGoal], final: bool = False, also: "EnabledFunc" = lambda _: True) -> "EnabledFunc" :
     return lambda world: world.options.objective.value in goals or not final and any(is_goal_enabled(world, x) for x in goals) and also(world)
@@ -66,16 +67,21 @@ locations = {
     # Disabled because it requires a specific event that might be skipped
     # "Lead Pipe":                        LocationInfo("In the first vent above when entering the Signal Room", region="Signal Lab", rule=Has("Half Hook")),
     "Miniature Gas Can":                LocationInfo("On top of the garage in a corner", "Alpha Base", region="Alpha Roof"),
+    **{f"Garage Gas Can {i+1}":         LocationInfo("", "Alpha Base", region="Garage") for i in range(3)},
     "Alpha Toolbox":                    LocationInfo("", "Alpha Base", region="Garage"),
     "ATV Wheel":                        LocationInfo("", "Alpha Base", region="Garage"),
     "Ammo Box":                         LocationInfo("Behind the crates in the garage", "Alpha Base", region="Garage"),
     "Alpha Broom":                      LocationInfo("In the utility closet", "Alpha Base", region="Utility Closet"),
+    "Utility Closet Gas Can":           LocationInfo("", "Alpha Base", region="Utility Closet"),
     "Pipebomb":                         LocationInfo("In the corner drawer in the signal room", "Alpha Base", region="Signal Lab"),
     "Sponge":                           LocationInfo("In the signal room", "Alpha Base", enabled=maintenance, region="Signal Lab"),
+    "Signal Lab Gas Can":               LocationInfo("", "Alpha Base", region="Signal Lab"),
     **{f"Alpha Fuse {i+1}":             LocationInfo("In the upstairs storage room", "Alpha Base", enabled=fuse, region="Storage Room") for i in range(3)},
+    "Substation Gas Can":               LocationInfo("", "Alpha Base"),
 
     **{f"TR{i+1} Watering Can":         LocationInfo("", f"TR{i+1}", region="Outside" if i != 2 else f"TR{i+1} Room") for i in range(3)},
     **{f"TR{i+1} Fuse":                 LocationInfo("", f"TR{i+1}", enabled=fuse, region="Outside" if i == 0 else f"TR{i+1} Room") for i in range(3)},
+    **{f"TR{i+1} Gas Can {j+1}":        LocationInfo("", f"TR{i+1}", region="Outside" if i == 0 or i == 1 and j < 2 else f"TR{i+1} Room") for i, j in enumerate((5, 4, 1))},
     "TR1 Toolbox":                      LocationInfo("", "TR1"),
     "TR1 Cigarettes":                   LocationInfo("", "TR1", region="TR1 Room"),
     "TR1 Tinfoil Hat":                  LocationInfo("", "TR1", region="TR1 Room"),
@@ -86,8 +92,9 @@ locations = {
     "TR3 Hiking Boots":                 LocationInfo("", "TR3", region="TR3 Room"),
 
     "Hole Toolbox":                     LocationInfo("", "The Hole"),
+    **{f"Hole Gas Can {i+1}":           LocationInfo("", "The Hole") for i in range(2)},
     "EMF Detector":                     LocationInfo("At the Hole, near a fallen construction light", "The Hole", enabled=buried, rule=HasAll("Shovel", "Metal Detector")),
-    # "Lantern":                          LocationInfo("At the Hole", "The Hole"),
+    # "Lantern":                          LocationInfo("At the Hole", "The Hole"),  # Disabled for randomizing its key
     "Hole Welding Mask":                LocationInfo("", "The Hole"),
 
     "Green Hatch Toolbox":              LocationInfo("", "Green Hatch"),
@@ -102,7 +109,7 @@ locations = {
     "Goat Trophy Head":                 LocationInfo("In the Abandoned Shack", "Abandoned Shack"),
     "Seed Pack (The Thingy)":           LocationInfo("In the Abandoned Shack", "Abandoned Shack"),
 
-    "Green Fire Rock":                  LocationInfo("Extinguish the green fire in the Village (Day 8+, from 12:00 AM to 1:00 AM)", "Village", enabled=time_sensitive, rule=Has("Day", DayItemFieldResolver(7), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True)),
+    "Extinguish the Green Fire":        LocationInfo("In the Village, Day 8+, from 12:00 AM to 1:00 AM", "Village", complex=True, enabled=time_sensitive, rule=Has("Day", DayItemFieldResolver(7), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True)),
     "Compost Bucket 1":                 LocationInfo("In the Village's farm plot", "Village"),
     "Compost Bucket 2":                 LocationInfo("In the Village's farm plot", "Village"),
 
@@ -116,21 +123,21 @@ locations = {
     "Jar of Honey":                     LocationInfo("Atop the second utility pole from TR3", "Misc", rule=Has("Half Hook")),
     "Argemia Mug":                      LocationInfo("Atop the utility pole closest to the windmills", "Misc", rule=Has("Half Hook")),
     "Limestone Slab":                   LocationInfo("At 567.0/237.0 near the treehouse", "Misc", enabled=buried, rule=HasAll("Shovel", "Metal Detector")),
-    "Antibreather Plush":               LocationInfo("Be in the Cave at 3:33 AM, then look in the larger nest", "Cave", enabled=time_sensitive),
-    "Erie Plush":                       LocationInfo("Bury a meat garbage bag at Sierra and wait for 1:00 AM", "Misc", enabled=lambda world: buried(world) and time_sensitive(world), rule=Has("Shovel")),
+    "Antibreather Plush":               LocationInfo("Be in the Cave at 3:33 AM, then look in the larger nest", "Cave", complex=True, enabled=time_sensitive, region="Cave"),
+    "Erie Plush":                       LocationInfo("Bury a meat garbage bag at Sierra and wait for 1:00 AM", "Misc", complex=True, enabled=lambda world: buried(world) and time_sensitive(world), rule=Has("Shovel") & CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs")),
     "Librarian Candle":                 LocationInfo("In the log under the lake surface", "Lake", enabled=buried, rule=Has("Shovel")),
     "Dream Plush":                      LocationInfo("Buried near the bottom side of the Lake", "Lake", enabled=buried, rule=HasAll("Shovel", "Metal Detector")),
-    "Monique Plush":                    LocationInfo("Smoke a cigarette and eat a baguette that's on the ground while sitting", "Misc", rule=Has("Cig Pack")),
+    "Monique Plush":                    LocationInfo("Smoke a cigarette and eat a baguette that's on the ground while sitting", "Misc", rule=Has("Cig Pack") & CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs")),
     "Buried Cacti":                     LocationInfo("Next to the light pole left of Foxtrot", "Misc", enabled=buried, rule=Has("Shovel")),
     "Buried Drive Box":                 LocationInfo("Next to the pole in the grass circle across the river from Alpha Base", "Misc", enabled=buried, rule=Has("Shovel")),
     "Wall Clock":                       LocationInfo("In the Security Booth", "Misc"),
-    "Unknown Fruit":                    LocationInfo("At -785.5/-821.7, out of fence", "Misc"),
+    "Unknown Fruit":                    LocationInfo("At -785.5/-821.7, out of fence", "Misc", rule=CanReachRegion("Garage")),  # Not strictly necessary but better with the ATV
     **{f"Forest Fuse {i+1}":            LocationInfo("At -331.9/-538.2", "Misc", enabled=fuse) for i in range(4)},
 
-    "Furfur Altar Leg 1":               LocationInfo("In the Antibreather nest, at -671.8/-563.8", "Cave", enabled=time_sensitive),
+    "Furfur Altar Leg 1":               LocationInfo("In the Antibreather nest, at -671.8/-563.8", "Cave", enabled=time_sensitive, region="Cave"),
     "Furfur Altar Leg 2":               LocationInfo("Buried between rocks in Stonehenge at 252.9/585.1", "Stonehenge", enabled=buried, rule=Has("Shovel")),
     "Furfur Altar Top":                 LocationInfo("Buried under the dead tree in the Lake, between 3:00 AM and 4:00 AM", "Lake", region="Lake", enabled=lambda world: buried(world) and time_sensitive(world), rule=Has("Shovel")),
-    "Furfur Plush":                     LocationInfo("Build the altar and burn a piece of meat under it", "Misc", enabled=furfur_plush_enabled, rule=HasAll("Furfur Altar Leg 1", "Furfur Altar Leg 2", "Furfur Altar Top", "Lighter", "Ritual Knife")),
+    "Furfur Plush":                     LocationInfo("Build the altar and burn a piece of meat under it", "Misc", complex=True, enabled=furfur_plush_enabled, rule=HasAll("Furfur Altar Leg 1", "Furfur Altar Leg 2", "Furfur Altar Top", "Lighter", "Ritual Knife")),
 
     "Alpha Server Sandwich":            LocationInfo("", "Alpha Base", enabled=chicken_sandwich, region="Server Room"),
     "Bathroom Sandwich":                LocationInfo("", "Alpha Base", enabled=chicken_sandwich, region="Bathroom"),
@@ -152,7 +159,7 @@ locations = {
     "Fenced Trees Sandwich":            LocationInfo("", "Misc", enabled=chicken_sandwich),
     "Hole Sandwich":                    LocationInfo("", "The Hole", enabled=chicken_sandwich),
     "Cave Entrance Sandwich":           LocationInfo("", "Cave", enabled=chicken_sandwich),
-    "Cave Mushroom Pile Sandwich":      LocationInfo("", "Cave", enabled=lambda world: time_sensitive(world) and chicken_sandwich(world)),
+    "Cave Mushroom Pile Sandwich":      LocationInfo("", "Cave", enabled=lambda world: time_sensitive(world) and chicken_sandwich(world), complex=True, region="Cave"),
 
     "Bowtie 1":                         LocationInfo("In the New Trees area", "Misc"),
     "Bowtie 2":                         LocationInfo("In the New Trees area", "Misc"),
@@ -163,7 +170,7 @@ locations = {
     "Jacket 1":                         LocationInfo("At the Hole", "The Hole"),
     "Jacket 2":                         LocationInfo("At the Hole", "The Hole"),
 
-    "Earth Tablet":                     LocationInfo("Within the New Trees area", "Misc", enabled=buried, rule=Has("Shovel")),
+    "Earth Tablet":                     LocationInfo("Within the New Trees area", "Misc", enabled=buried, rule=Has("Shovel") & HasAny("Digital Map", "Metal Detector")),
     "Water Tablet":                     LocationInfo("In the Lake, beneath the tree", "Lake", enabled=buried, region="Lake", rule=Has("Shovel")),
     "Air Tablet":                       LocationInfo("Atop the utility pole closest to TR1", "TR1", rule=Has("Half Hook")),
     "Fire Tablet":                      LocationInfo("In the Lambert Ritual dimension, accessible in the Abandoned Shack at 3:33 AM", "Abandoned Shack", enabled=lambda world: buried(world) and time_sensitive(world), rule=Has("Shovel")),
@@ -183,33 +190,36 @@ locations = {
     ) for i in range(max_days)},
     **{f"Sell Level {j} Signal {i+1}":  LocationInfo("", "Tasks",
         enabled=lambda world, n=i: n < world.options.signal_locations.value,
-        rule=Has("Progressive Processing Level", j, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True)
-             & CanReachRegion("Signal Lab") & CanReachRegion("Garage") & CanReachRegion("Alpha Stairs"),
+        rule=Has("Progressive Processing Level", j, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True) & CanGetSignals(processing=j > 0),
         world_item_tier=WorldItems.option_none
     ) for j in range(4) for i in range(max_signal_locations)},
     **{f"Daily Task Done {i+1}":        LocationInfo("", "Tasks",
         enabled=lambda world, n=i: n < world.options.daily_task_locations.value,
-        rule=Has("Day", DayItemFieldResolver(1), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True)  # There's no daily taks on the first day. This assumes you start on day 1 (the whole world does tbh)
-             & CanReachRegion("Signal Lab") & CanReachRegion("Garage") & CanReachRegion("Alpha Stairs"),
+        complex=True,
+        rule=Has("Day", DayItemFieldResolver(1), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True) & CanGetSignals(processing=True),  # There's no daily taks on the first day. This assumes you start on day 1 (the whole world does tbh)
         world_item_tier=WorldItems.option_none
     ) for i in range(max_daily_tasks_locations)},
     **{f"Repair Server {i+1}":          LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.server_repair_locations.value, world_item_tier=WorldItems.option_none) for i in range(max_server_repair_locations)},
     **{f"Repair Transformer {i+1}":     LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.transformer_repair_locations.value, world_item_tier=WorldItems.option_none) for i in range(max_transformer_repair_locations)},
-    **{f"Replace Fuse {i+1}":           LocationInfo("", "Tasks", enabled=lambda world, n=i: n < world.options.fuse_replacement_locations.value, world_item_tier=WorldItems.option_none, rule=Has("Fuse", count=min(i+1, 10))) for i in range(max_fuse_replacement_locations)},
+    **{f"Replace Fuse {i+1}":           LocationInfo("", "Tasks",
+        enabled=lambda world, n=i: n < world.options.fuse_replacement_locations.value,
+        rule=Has("Fuse", count=min(i+1, 10)) & Has("Random Fuse Blowout", count=max(0, i-15)),
+        world_item_tier=WorldItems.option_none
+    ) for i in range(max_fuse_replacement_locations)},
     **{f"Sell 24 Full Trash Bags {i+1}": LocationInfo("", "Tasks",
         enabled=lambda world, n=i: n < world.options.trash_bags_locations.value,
-        rule=CanReachRegion("Signal Lab") & CanReachRegion("Garage") & CanReachRegion("Alpha Stairs"),
-        world_item_tier=WorldItems.option_none, region="Garage"
+        rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs"),
+        world_item_tier=WorldItems.option_none
     ) for i in range(max_trash_cleaning_locations)},
     **{f"Light the {dir} Candle":       LocationInfo("", "Tasks", enabled=candles, rule=Has("Lighter"), world_item_tier=WorldItems.option_none) for dir in ('North', 'Northwest', 'West', 'Southwest', 'South', 'Southeast', 'East', 'Northeast')},
 
-    "Repair the Oven":                  LocationInfo("", "Alpha Base", enabled=maintenance, region="Staff Room", rule=CanReachRegion("Storage Room"), world_item_tier=WorldItems.option_none),
+    "Repair the Oven":                  LocationInfo("", "Alpha Base", enabled=maintenance, region="Staff Room", world_item_tier=WorldItems.option_none),
     "Clean the Toilet":                 LocationInfo("", "Alpha Base", enabled=maintenance, region="Bathroom", rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
     "Clean the Sink":                   LocationInfo("", "Alpha Base", enabled=maintenance, region="Bathroom", rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
     "Clean the Shower":                 LocationInfo("", "Alpha Base", enabled=maintenance, region="Bathroom", rule=Has("Sponge"), world_item_tier=WorldItems.option_none),
-    "Bake Cookies":                     LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
-    "Bake Bread":                       LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
-    "Bake a Pizza":                     LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
+    "Bake Cookies":                     LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
+    "Bake Bread":                       LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
+    "Bake a Pizza":                     LocationInfo("", "Alpha Base", enabled=cooking, region="Staff Room", rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs"), world_item_tier=WorldItems.option_none),
 
     **{f"Ball Joints Box {i+1}":        LocationInfo("In the gravel pile near Romeo", "Misc", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=buried), rule=HasAll("Shovel", "Metal Detector")) for i in range(6)},
     **{f"TR{i+1} Limb Joints {j+1}":    LocationInfo("", f"TR{i+1}", enabled=goal({VOTVGoal.KERFUR_OMEGA}), region=f"TR{i+1} Room") for i in range(3) for j in range(2)},
@@ -218,15 +228,15 @@ locations = {
     "TR1 Gas Welder 2":                 LocationInfo("", "TR1", enabled=goal({VOTVGoal.KERFUR_OMEGA})),
     "Hole Gas Welder":                  LocationInfo("", "The Hole", enabled=goal({VOTVGoal.KERFUR_OMEGA})),
 
-    "Bunker Keycard":                   LocationInfo("Hookable from the slot at the back of the bunker", "Alpha Base", enabled=goal({VOTVGoal.KERFUR_OMEGA}), rule=HasAny("Bunker Keycard", "Half Hook")),
+    "Bunker Keycard":                   LocationInfo("Hookable from the slot at the back of the bunker", "Alpha Base", enabled=goal({VOTVGoal.KERFUR_OMEGA}), rule=Has("Bunker Keycard") & CanReachRegion("Bunker") | Has("Half Hook")),
     "Kerfur-Omega Complete Manual":     LocationInfo("", "Alpha Base", enabled=goal({VOTVGoal.KERFUR_OMEGA}), region="Bunker"),
     "Kerfur-Omega Documents Binder":    LocationInfo("", "Alpha Base", enabled=goal({VOTVGoal.KERFUR_OMEGA}), region="Bunker"),
 
     "Pickaxe":                          LocationInfo("", "Lake", enabled=goal({VOTVGoal.KERFUR_OMEGA}), region="Lake"),
-    "Omega AI Module":                  LocationInfo("", "Lake", enabled=goal({VOTVGoal.KERFUR_OMEGA}), region="Lake", rule=HasAny("Half Hook", "Hacksaw")),
+    "Omega AI Module":                  LocationInfo("", "Lake", complex=True, enabled=goal({VOTVGoal.KERFUR_OMEGA}), region="Lake", rule=HasAny("Half Hook", "Hacksaw")),
 
     "Buried Radioactive Capsule":       LocationInfo("", "TR2", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=buried), rule=Has("Shovel")),
-    "Crafted Radioactive Capsule":      LocationInfo("", "Misc", enabled=lambda world: bool(world.options.enable_crafted_capsule.value) and goal({VOTVGoal.KERFUR_OMEGA})(world), rule=HasAll("Hazmat Suit", "Gas Welder", "Radioactive Capsule Blueprint") & HasAny("Pickaxe", "Hacksaw")),
+    "Crafted Radioactive Capsule":      LocationInfo("", "Misc", complex=True, enabled=lambda world: bool(world.options.enable_crafted_capsule.value) and goal({VOTVGoal.KERFUR_OMEGA})(world), region="Cave", rule=HasAll("Hazmat Suit", "Gas Welder", "Radioactive Capsule Blueprint", "Pickaxe", "Half Hook")),
 
     "Basement Skull":                   LocationInfo("", "Alpha Base", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}), region="Alpha Stairs"),
     "Buried Box Skull":                 LocationInfo("At 263.25/-7.25", "Misc", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=buried), rule=Has("Shovel")),
@@ -234,21 +244,21 @@ locations = {
     "Radioactive Capsule Skull":        LocationInfo("", "TR2", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH})),
     "Cave Entrance Skull":              LocationInfo("", "Cave", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH})),
     "Stonehenge Skull":                 LocationInfo("", "Stonehenge", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH})),
-    "Rozital Ship Skull":               LocationInfo("", "Misc", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}), rule=HasAll("Lifecrystal Signal", "Shovel") & Has("Progressive Processing Level", 3, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True)),
+    "Rozital Ship Skull":               LocationInfo("", "Misc", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}), rule=HasAll("Lifecrystal Signal", "Shovel") & CanGetSignals(processing=True) & Has("Progressive Processing Level", 3, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True)),
 
     "Fire Rune":                        LocationInfo("Explode a rock, violently", "Misc", enabled=goal({VOTVGoal.LAMBERT_PLUSH}), rule=Has("Half Hook", count=2)),
     "Earth Rune":                       LocationInfo("Bury a rock in the big log near TR2 and dig it up between 0:00 and 1:00", "Misc", enabled=goal({VOTVGoal.LAMBERT_PLUSH}, also=lambda world: buried(world) and time_sensitive(world)), rule=Has("Shovel")),
     "Water Rune":                       LocationInfo("Send a rock off the map in the river near the Lake and catch it on the other side", "Misc", enabled=goal({VOTVGoal.LAMBERT_PLUSH})),
     "Air Rune":                         LocationInfo("Send a rock to the top of the map with balloons", "Misc", enabled=goal({VOTVGoal.LAMBERT_PLUSH}), rule=Has("Balloon Pack (WIP)")),
-    "Ritual Knife":                     LocationInfo("In the Lambert Ritual dimension, accessible in the Abandoned Shack at 3:33 AM", "Abandoned Shack", enabled=goal({VOTVGoal.LAMBERT_PLUSH}, also=time_sensitive)),
+    "Ritual Knife":                     LocationInfo("In the Lambert Ritual dimension, accessible in the Abandoned Shack at 3:33 AM", "Abandoned Shack", complex=True, enabled=goal({VOTVGoal.LAMBERT_PLUSH}, also=time_sensitive)),
 
-    "Shrimp Pack":                      LocationInfo("In the fridge", "Alpha Base", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Staff Room"),
+    # "Shrimp Pack":                      LocationInfo("In the fridge", "Alpha Base", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Staff Room"),  # Disabled for randomizing its key
     "Red Argemia Plush":                LocationInfo("In the hole near the estuary of the river in the top right", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgb))),
     "Blue Argemia Plush":               LocationInfo("In the river between the first two bridges when walking towards the base", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgb))),
-    "Green Argemia Plush":              LocationInfo("At the top of the mountain in the bottom left, out of fence", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgb)), rule=HasAny("Hiking Boots", "Half Hook")),
-    "Yellow Argemia Plush":             LocationInfo("Place a shrimp pack at each corner of the map and in the basement, then look up and away after midnight", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Alpha Stairs", rule=Has("Shrimp Pack", 17)),
-    "Cyan Argemia Plush":               LocationInfo("Put 12 shrimp packs in the emergency shower, and explode them", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Signal Lab", rule=Has("Shrimp Pack", 17)),
-    "Magenta Argemia Plush":            LocationInfo("At the Rozital Ship after the lifecrystal signal is processed", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Signal Lab", rule=Has("Lifecrystal Signal")),
+    "Green Argemia Plush":              LocationInfo("At the top of the mountain in the bottom left, out of fence", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgb))),
+    "Yellow Argemia Plush":             LocationInfo("Place a shrimp pack at each corner of the map and in the basement, then look up and away after midnight", "Misc", complex=True, enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Alpha Stairs", rule=Has("Shrimp Pack", 16) & CanReachRegion("Staff Room")),
+    "Cyan Argemia Plush":               LocationInfo("Put 12 shrimp packs in the emergency shower, and explode them", "Misc", complex=True, enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Signal Lab", rule=Has("Shrimp Pack", 16) & CanReachRegion("Staff Room")),  # 17, -1 since we assume the players have the fridge Shrimp Pack
+    "Magenta Argemia Plush":            LocationInfo("At the Rozital Ship after the lifecrystal signal is processed", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), rule=Has("Lifecrystal Signal") & CanGetSignals(processing=False)),
     "Nuclear Pink Argemia Plush":       LocationInfo("Near the radio tower at 35.23/-37.24, invisible until bumped", "Misc", enabled=argemia_plush(ArgemiaPlushes.option_all)),
     "Nuclear Yellow Argemia Plush":     LocationInfo("At -634.14/181.37", "Misc", enabled=lambda world: buried(world) and argemia_plush(ArgemiaPlushes.option_all)(world), rule=HasAll("Shovel", "Metal Detector")),
     "Nuclear Orange Argemia Plush":     LocationInfo("Next to the barrier at 872.25/-793.0, high in the sky", "Misc", enabled=argemia_plush(ArgemiaPlushes.option_all), rule=Has("Half Hook")),

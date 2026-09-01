@@ -82,6 +82,9 @@ def funny(classification: "ClassificationResolvable") -> "DynamicClassification"
 def door(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: resolve(classification, world) if world.options.doors_as_items.value else {}
 
+def breaker(classification: "ClassificationResolvable") -> "DynamicClassification":
+    return lambda world: resolve(classification, world) if world.options.breakers_as_items.value else {}
+
 def upgrade(classification: "ClassificationResolvable") -> "DynamicClassification":
     return lambda world: {
         k: v for k, v in resolve(classification, world).items()
@@ -131,13 +134,14 @@ goal_items = {
 
     "Skull":                            ExtraItem(goal_item({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, plus({IC.filler: 5}, buried({IC.filler: 2})))),
 
+    # 17 -1 since we assume the player will get the Shrimp Pack in the fridge
+    "Shrimp Pack":                      ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.progression: 16}))),
     "Red Argemia Plush":                ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgb, {IC.filler: 1}))),
     "Blue Argemia Plush":               ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgb, {IC.filler: 1}))),
     "Green Argemia Plush":              ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgb, {IC.filler: 1}))),
     "Yellow Argemia Plush":             ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
     "Magenta Argemia Plush":            ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
     "Cyan Argemia Plush":               ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.filler: 1}))),
-    "Shrimp Pack":                      ExtraItem(goal_item({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, argemia_plush(ArgemiaPlushes.option_rgbycm, {IC.progression: 17}))),
 
     "Balloon Pack (WIP)":               ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.progression: 1})),
     "Fire Rune":                        ExtraItem(goal_item({VOTVGoal.LAMBERT_PLUSH}, {IC.filler: 1})),
@@ -150,14 +154,14 @@ goal_items = {
 }
 
 extra_items = {
-    "Alpha Base Entrance":                              ExtraItem(door({IC.progression: 1})),
-    "Signal Lab Entrance":                              ExtraItem(door({IC.progression: 1})),
+    # "Alpha Base Entrance":                              ExtraItem(door({IC.progression: 1})),
+    # "Signal Lab Entrance":                              ExtraItem(door({IC.progression: 1})),
+    # "Alpha Stairs Entrance":                            ExtraItem(door({IC.progression: 1})),
     "Server Room Entrance":                             ExtraItem(door({IC.progression: 1})),
     "Garage Entrance":                                  ExtraItem(door({IC.progression: 1})),
     "Admin Room Entrance":                              ExtraItem(door({IC.progression: 1})),
     "Break Room Entrance":                              ExtraItem(door({IC.progression: 1})),
     "Utility Closet Entrance":                          ExtraItem(door({IC.progression: 1})),
-    "Alpha Stairs Entrance":                            ExtraItem(door({IC.progression: 1})),
     "Storage Room Entrance":                            ExtraItem(door({IC.progression: 1})),
     "Staff Room Entrance":                              ExtraItem(door({IC.progression: 1})),
     "Bathroom Entrance":                                ExtraItem(door({IC.progression: 1})),
@@ -167,6 +171,11 @@ extra_items = {
     "TR1 Room Entrance":                                ExtraItem(door({IC.progression: 1})),
     "TR2 Room Entrance":                                ExtraItem(door({IC.progression: 1})),
     "TR3 Room Entrance":                                ExtraItem(door({IC.progression: 1})),
+
+    "Coordinates Breaker":                              ExtraItem(breaker({IC.progression: 1})),
+    "Download Breaker":                                 ExtraItem(breaker({IC.progression: 1})),
+    "Playing Breaker":                                  ExtraItem(breaker({IC.progression: 1})),
+    "Processing Breaker":                               ExtraItem(breaker({IC.progression: 1})),
 
     "Half Hook":                                        ExtraItem({IC.progression: 2}),
     "Shovel":                                           ExtraItem({IC.progression: 1, IC.useful: 3}),
@@ -184,6 +193,7 @@ extra_items = {
     "Cig Pack":                                         ExtraItem({IC.progression: 1}),
     "Sponge":                                           ExtraItem(lambda world: {IC.progression: 1} if world.options.maintenance_tasks.value else {}),
     "Fuse":                                             ExtraItem(lambda world: {IC.progression: 10} if world.options.fuse_replacement_locations.value else {}),
+    "Random Fuse Blowout":                              ExtraItem(lambda world: {IC.progression | IC.trap: world.options.fuse_replacement_locations.value - 15}),
     "Crowbar":                                          ExtraItem(lambda world: {(IC.progression if world.options.chicken_sandwiches.value else IC.useful): 1}),
     "Day":                                              ExtraItem(lambda world: {IC.progression: day_item_count(world)} if world.options.day_as_items.value else {}),
 
@@ -193,7 +203,7 @@ extra_items = {
 
     # "Lead Pipe":                                        ExtraItem({IC.useful: 1}),
     "Axe":                                              ExtraItem({IC.useful: 1}),
-    "Gas Can":                                          ExtraItem({IC.useful: 1}),
+    "Gas Can":                                          ExtraItem({IC.useful: 19}),
     "Bike Helmet":                                      ExtraItem({IC.useful: 1}),
     "Digital Map":                                      ExtraItem({IC.useful: 1}),
     "Progressive Processing Speed":                     ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
@@ -224,11 +234,12 @@ extra_items = {
     "Paper Scrap Recipe":                               ExtraItem(recipe({IC.useful: 1})),
     "Wood Scrap Recipe":                                ExtraItem(recipe({IC.useful: 1})),
     "Progressive Sleeping Bag":                         ExtraItem({IC.useful: 3}),
-    "Toolbox":                                          ExtraItem({IC.useful: 1, IC.filler: 3}),
+    "Toolbox":                                          ExtraItem({IC.useful: 4}),
     "Car Battery Charger":                              ExtraItem({IC.useful: 1}),
     "First Aid Medkit":                                 ExtraItem({IC.useful: 1}),
     "Jar of Honey":                                     ExtraItem({IC.useful: 1}),
     "ATV wheel":                                        ExtraItem({IC.useful: 1}),
+    "Positive Reputation":                              ExtraItem(lambda world: {IC.useful: world.options.ariral_reputation_items.value}),
 
     "Chicken Sandwich":                                 ExtraItem(plus({IC.filler: 19}, buried({IC.filler: 1}), time_sensitive({IC.filler: 1}))),
     "Rubble Recipe":                                    ExtraItem(recipe({IC.filler: 1})),
@@ -306,5 +317,6 @@ extra_items = {
     "Drunk Trap":                                       ExtraItem({IC.trap: 1}),
     "Points Fine Trap":                                 ExtraItem({IC.trap: 1}),
     "Flat Tire Trap":                                   ExtraItem({IC.trap: 1}),
-    "Dead Flashlight Trap":                             ExtraItem({IC.trap: 1})
+    "Dead Flashlight Trap":                             ExtraItem({IC.trap: 1}),
+    "Negative Reputation Trap":                         ExtraItem(lambda world: {IC.trap: 1} if world.options.ariral_reputation_items.value else {})
 }

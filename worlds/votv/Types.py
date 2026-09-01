@@ -43,6 +43,7 @@ LOC_OFFSET = 1000
 class LocData(NamedTuple):
     base_code: Optional[int]
     region: Optional[str]
+    complex: bool = False
 
     @property
     def ap_code(self):

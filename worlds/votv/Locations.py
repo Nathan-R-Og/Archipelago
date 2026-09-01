@@ -61,7 +61,7 @@ for item_name in shop_items.keys():
     current_id += 1
 
 for name, info in locations.items():
-    votv_locations[name] = LocData(current_id, info.region)
+    votv_locations[name] = LocData(current_id, info.region, info.complex)
     current_id += 1
 
 # from .data.achievement_data import *

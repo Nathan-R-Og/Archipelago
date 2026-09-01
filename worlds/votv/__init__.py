@@ -170,9 +170,11 @@ class VOTVWorld(World):
                 "TrapChance":                   self.options.trap_chance.value,
                 "RockCandles":                  self.options.rock_candles.value,
                 "DoorsAsItems":                 self.options.doors_as_items.value,
+                "AriralReputationItems":        self.options.ariral_reputation_items.value,
+                "AriralReputationAmount":       self.options.ariral_reputation_amount.value,
                 "DeathLink":                    self.options.death_link.value
             },
-            "Version": [0, 5, 0],
+            "Version": [0, 6, 0],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
             "ItemNames": reduce(lambda acc, x: {**acc, x: (acc[x] if x in acc else 0) + 1}, item_names, {}),  # unique names of all the items in our pool

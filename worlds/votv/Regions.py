@@ -1,4 +1,4 @@
-from BaseClasses import Region
+from BaseClasses import LocationProgressType, Region
 from typing import TYPE_CHECKING
 
 from .Types import VOTVLocation
@@ -41,6 +41,10 @@ def create_region(world: "VOTVWorld", name: str) -> Region:
             if not is_valid_location(world, key):
                 continue
             location = VOTVLocation(world.player, key, data.ap_code, reg)
+            if key in world.options.priority_locations.value or data.complex and world.options.priority_complex_locations.value:
+                location.progress_type = LocationProgressType.PRIORITY
+            if key in world.options.exclude_locations.value:
+                location.progress_type = LocationProgressType.EXCLUDED
             reg.locations.append(location)
 
     world.multiworld.regions.append(reg)

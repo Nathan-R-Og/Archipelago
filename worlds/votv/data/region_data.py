@@ -1,8 +1,9 @@
 from typing import NamedTuple
 
 from rule_builder.options import OptionFilter
-from rule_builder.rules import Has, HasAll, Rule, True_
-from worlds.votv.Options import DoorsAsItems
+from rule_builder.rules import CanReachRegion, Has, HasAll, Rule, True_
+from worlds.votv.Options import DayAsItems, DoorsAsItems
+from worlds.votv.Utils import DayItemFieldResolver
 
 class EntranceInfo(NamedTuple):
     name: str
@@ -24,23 +25,27 @@ class RegionInfo(NamedTuple):
 
 regions = {
     "Outside": RegionInfo([
-        door_entrance("Alpha Base"),
+        EntranceInfo("Alpha Base Entrance", "Alpha Base", two_way=True),
         door_entrance("Bunker", also=Has("Bunker Keycard")),
         door_entrance("TR1 Room"),
         door_entrance("TR2 Room"),
         door_entrance("TR3 Room"),
         EntranceInfo("Climb up", "Alpha Roof", access_rule=Has("Half Hook")),
-        EntranceInfo("Dive under", "Lake", access_rule=HasAll("Scuba Mask", "Scuba Mask Tank"))
+        EntranceInfo("Dive under", "Lake", access_rule=HasAll("Scuba Mask", "Scuba Mask Tank")),
+        EntranceInfo("Open the cave", "Cave", access_rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs") | Has("Day", DayItemFieldResolver(3), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True))
     ]),
     "Lake": RegionInfo([
         EntranceInfo("Emerge", "Outside")
     ]),
+    "Cave": RegionInfo([
+        EntranceInfo("Exit the cave", "Outside")
+    ]),
 
     "Alpha Base": RegionInfo([
-        door_entrance("Signal Lab"),
+        EntranceInfo("Signal Lab Entrance", "Signal Lab", two_way=True),
         door_entrance("Break Room"),
         door_entrance("Utility Closet"),
-        door_entrance("Alpha Stairs")
+        EntranceInfo("Alpha Stairs Entrance", "Alpha Stairs", two_way=True),
     ]),
     "Signal Lab": RegionInfo([
         door_entrance("Server Room")
@@ -52,7 +57,7 @@ regions = {
         door_entrance("Admin Room"),
         EntranceInfo("Climb out", "Alpha Roof", access_rule=Has("Half Hook")),
         EntranceInfo("Elevator", "Storage Room", two_way=True),
-        EntranceInfo("Garage Door", "Outside")
+        EntranceInfo("Garage door", "Outside")
     ]),
     "Admin Room": RegionInfo([]),
     "Alpha Stairs": RegionInfo([

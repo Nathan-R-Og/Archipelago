@@ -2,6 +2,9 @@ from dataclasses import dataclass
 from typing import Any, Callable, TYPE_CHECKING, TypeVar, override
 
 from rule_builder.field_resolvers import FieldResolver
+from rule_builder.options import OptionFilter
+from rule_builder.rules import CanReachRegion, Has, HasAll, Rule
+from worlds.votv.Options import BreakersAsItems
 
 from .Types import VOTVGoal
 from .Constants import max_days
@@ -42,3 +45,13 @@ class DayItemFieldResolver(FieldResolver, game="Voices of the Void"):
     @override
     def resolve(self, world: "VOTVWorld") -> Any:
         return min(self.count, day_item_count(world))
+
+@dataclass()
+class CanGetSignals(Rule, game="Voices of the Void"):
+    processing: bool
+
+    def _instantiate(self, world: "VOTVWorld") -> Rule.Resolved:
+        rule = CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs") & HasAll("Coordinates Breaker", "Download Breaker", "Playing Breaker", options=[OptionFilter(BreakersAsItems, True)], filtered_resolution=True)
+        if self.processing:
+            rule &= Has("Processing Breaker", options=[OptionFilter(BreakersAsItems, True)], filtered_resolution=True)
+        return rule.resolve(world)

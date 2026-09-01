@@ -132,9 +132,35 @@ class WorldItems(Choice):
 
 class DoorsAsItems(DefaultOffToggle):
     """
-    Determines if doors started jammed and have to be found.
+    Determines if doors start jammed and have to be found.
     """
     display_name = "Doors As Items"
+
+class BreakersAsItems(DefaultOffToggle):
+    """
+    Determines if non-utilities breakers start unable to be activated until a certain item is found.
+    """
+    display_name = "Breakers As Items"
+
+class AriralReputationItems(Range):
+    """
+    Determines how many items that give positive reputation will be added. These items will be marked as useful.
+    Consider turning this up for long runs, in particular if you have Shrimp Packs as items (if Argemia Plushes include the CMY plushes).
+    If this is above 0, traps can also generate negative reputation items.
+    """
+    display_name = "Positive Ariral Reputations Items"
+    range_start = 0
+    range_end = 50
+    default = 0
+
+class AriralReputationAmount(Range):
+    """
+    Determines how much reputation the items give (or take, in case of traps).
+    """
+    display_name = "Positive Ariral Reputations Amount"
+    range_start = 0
+    range_end = 100
+    default = 10
 
 class BonusPointsChance(Range):
     """
@@ -298,6 +324,12 @@ class ArgemiaPlushes(Choice):
     option_all = 3
     default = 1
 
+class PriorityComplexLocations(DefaultOnToggle):
+    """
+    Determines if locations that require multiple steps are marked as priority.
+    """
+    display_name="Priority Complex Locations"
+
 class KerfurOmegaEnabled(DefaultOnToggle):
     """
     Determines if Kerfur-Omega locations and items should be enabled, even if it's not the objective.
@@ -349,6 +381,9 @@ class VOTVOptions(PerGameCommonOptions):
     atv_upgrades_as_items:          ATVUpgradesAsItems
     # world_items:                    WorldItems
     doors_as_items:                 DoorsAsItems
+    breakers_as_items:              BreakersAsItems
+    ariral_reputation_items:        AriralReputationItems
+    ariral_reputation_amount:       AriralReputationAmount
     bonus_points_chance:            BonusPointsChance
     bonus_points_amount:            BonusPointsAmount
     survive_days_locations:         SurviveDayLocations
@@ -368,6 +403,7 @@ class VOTVOptions(PerGameCommonOptions):
     time_sensitive:                 TimeSensitive
     funny_setting:                  FunnySetting
     argemia_plushes:                ArgemiaPlushes
+    priority_complex_locations:     PriorityComplexLocations
     kerfur_omega_enabled:           KerfurOmegaEnabled
     hell_rock_enabled:              HellRockEnabled
     lambert_plush_enabled:          LambertPlushEnabled
@@ -392,6 +428,9 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         ATVUpgradesAsItems,
         # WorldItems,
         DoorsAsItems,
+        BreakersAsItems,
+        AriralReputationItems,
+        AriralReputationAmount,
         BonusPointsChance,
         BonusPointsAmount,
         SurviveDayLocations,
@@ -411,6 +450,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         TimeSensitive,
         FunnySetting,
         ArgemiaPlushes,
+        PriorityComplexLocations,
         KerfurOmegaEnabled,
         HellRockEnabled,
         LambertPlushEnabled,
