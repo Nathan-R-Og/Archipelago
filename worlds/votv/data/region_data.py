@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 from rule_builder.options import OptionFilter
 from rule_builder.rules import CanReachRegion, Has, HasAll, Rule, True_
-from worlds.votv.Options import DayAsItems, DoorsAsItems
+from worlds.votv.Options import DayAsItems, DoorsAsItems, FenceClimbing
 from worlds.votv.Utils import DayItemFieldResolver
 
 class EntranceInfo(NamedTuple):
@@ -20,6 +20,14 @@ def door_entrance(connected_region: str, item: str = "", also: Rule = True_(), o
         two_way=not one_way
     )
 
+def fence_entrance(connected_region: str, also: Rule = True_(), one_way: bool = False) -> EntranceInfo:
+    return EntranceInfo(
+        connected_region,
+        connected_region,
+        access_rule=also & Has(f"Half Hook", options=[OptionFilter(FenceClimbing, True)], filtered_resolution=True),
+        two_way=not one_way
+    )
+
 class RegionInfo(NamedTuple):
     exits: list[EntranceInfo]
 
@@ -32,7 +40,12 @@ regions = {
         door_entrance("TR3 Room"),
         EntranceInfo("Climb up", "Alpha Roof", access_rule=Has("Half Hook")),
         EntranceInfo("Dive under", "Lake", access_rule=HasAll("Scuba Mask", "Scuba Mask Tank")),
-        EntranceInfo("Open the cave", "Cave", access_rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs") | Has("Day", DayItemFieldResolver(3), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True))
+        EntranceInfo("Open the cave", "Cave", access_rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs") | Has("Day", DayItemFieldResolver(3), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True)),
+        fence_entrance("New Trees Area"),
+        fence_entrance("Restricted Area"),
+        fence_entrance("Stonehenge"),
+        fence_entrance("Green Hatch"),
+        fence_entrance("Abandoned Shack")
     ]),
     "Lake": RegionInfo([
         EntranceInfo("Emerge", "Outside")
@@ -40,6 +53,11 @@ regions = {
     "Cave": RegionInfo([
         EntranceInfo("Exit the cave", "Outside")
     ]),
+    "New Trees Area": RegionInfo([]),
+    "Restricted Area": RegionInfo([]),
+    "Stonehenge": RegionInfo([]),
+    "Green Hatch": RegionInfo([]),
+    "Abandoned Shack": RegionInfo([]),
 
     "Alpha Base": RegionInfo([
         EntranceInfo("Signal Lab Entrance", "Signal Lab", two_way=True),

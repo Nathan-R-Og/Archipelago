@@ -62,9 +62,15 @@ class SurviveDay(Range):
 
 class DeathLink(DefaultOffToggle):
     """
-    Determins if death link is enabled in this run.
+    Determines if death link is enabled in this run.
     """
     display_name = "Death Link"
+
+class FenceClimbing(DefaultOnToggle):
+    """
+    Determines if the logic assumes the player is able to climb fences, or requires a hook to do so.
+    """
+    display_name="Fence Climbing"
 
 class DayAsItems(DefaultOffToggle):
     """
@@ -374,6 +380,7 @@ class VOTVOptions(PerGameCommonOptions):
     enable_crafted_capsule:         EnableCraftedCapsule
     survive_day:                    SurviveDay
     death_link:                     DeathLink
+    fence_climbing:                 FenceClimbing
     day_as_items:                   DayAsItems
     scrap_recipes_as_items:         ScrapRecipesAsItems
     upgrades_as_items:              UpgradesAsItems
@@ -421,6 +428,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         DeathLink
     ],
     "Item & Location Options": [
+        FenceClimbing,
         DayAsItems,
         ScrapRecipesAsItems,
         UpgradesAsItems,
