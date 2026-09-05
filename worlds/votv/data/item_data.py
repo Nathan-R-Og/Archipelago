@@ -187,7 +187,7 @@ extra_items = {
     "Glass Scrap Recipe":                               ExtraItem(recipe({IC.progression: 1})),
     "Plastic Scrap Recipe":                             ExtraItem(recipe({IC.progression: 1})),
     "Progressive Processing Level":                     ExtraItem(upgrade({IC.progression: 3})),
-    "Lifecrystal Signal":                               ExtraItem(lambda world: {IC.progression: 1} if any(is_goal_enabled(world, x) for x in {VOTVGoal.HELL_ROCK, VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}) else {}),
+    "Lifecrystal Signal":                               ExtraItem(lambda world: {IC.progression: 1} if is_goal_enabled(world, VOTVGoal.HELL_ROCK, also=lambda w: w.options.buried_items.value) or any(is_goal_enabled(world, x) for x in {VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}) else {}),
     "Hiking Boots":                                     ExtraItem({IC.progression: 1}),
     "Lighter":                                          ExtraItem({IC.progression: 1}),
     "Cig Pack":                                         ExtraItem({IC.progression: 1}),
@@ -195,6 +195,7 @@ extra_items = {
     "Fuse":                                             ExtraItem(lambda world: {IC.progression: 10} if world.options.fuse_replacement_locations.value else {}),
     "Random Fuse Blowout":                              ExtraItem(lambda world: {IC.progression | IC.trap: world.options.fuse_replacement_locations.value - 15}),
     "Crowbar":                                          ExtraItem(lambda world: {(IC.progression if world.options.chicken_sandwiches.value else IC.useful): 1}),
+    "Gas Can":                                          ExtraItem({IC.progression: 1, IC.useful: 18}),
     "Day":                                              ExtraItem(lambda world: {IC.progression: day_item_count(world)} if world.options.day_as_items.value else {}),
 
     "Furfur Altar Leg 1":                               ExtraItem(lambda world: time_sensitive({(IC.progression if furfur_plush_enabled(world) else IC.filler): 1})(world)),
@@ -203,7 +204,6 @@ extra_items = {
 
     # "Lead Pipe":                                        ExtraItem({IC.useful: 1}),
     "Axe":                                              ExtraItem({IC.useful: 1}),
-    "Gas Can":                                          ExtraItem({IC.useful: 19}),
     "Bike Helmet":                                      ExtraItem({IC.useful: 1}),
     "Digital Map":                                      ExtraItem({IC.useful: 1}),
     "Progressive Processing Speed":                     ExtraItem(upgrade({IC.useful: 8, IC.filler: 8})),
@@ -231,8 +231,6 @@ extra_items = {
     "ATV Upgrade (Solar Panel)":                        ExtraItem(atv_upgrade({IC.useful: 1})),
     "ATV Upgrade (Map)":                                ExtraItem(atv_upgrade({IC.useful: 1})),
     "Rubber Scrap Recipe":                              ExtraItem(recipe({IC.useful: 1})),
-    "Paper Scrap Recipe":                               ExtraItem(recipe({IC.useful: 1})),
-    "Wood Scrap Recipe":                                ExtraItem(recipe({IC.useful: 1})),
     "Progressive Sleeping Bag":                         ExtraItem({IC.useful: 3}),
     "Toolbox":                                          ExtraItem({IC.useful: 4}),
     "Car Battery Charger":                              ExtraItem({IC.useful: 1}),
@@ -241,6 +239,8 @@ extra_items = {
     "ATV wheel":                                        ExtraItem({IC.useful: 1}),
     "Positive Reputation":                              ExtraItem(lambda world: {IC.useful: world.options.ariral_reputation_items.value}),
 
+    "Paper Scrap Recipe":                               ExtraItem(recipe({IC.filler: 1})),
+    "Wood Scrap Recipe":                                ExtraItem(recipe({IC.filler: 1})),
     "Chicken Sandwich":                                 ExtraItem(plus({IC.filler: 19}, buried({IC.filler: 1}), time_sensitive({IC.filler: 1}))),
     "Rubble Recipe":                                    ExtraItem(recipe({IC.filler: 1})),
     "Air Tablet":                                       ExtraItem(buried({IC.filler: 1})),
