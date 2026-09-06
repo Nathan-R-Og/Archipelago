@@ -195,7 +195,7 @@ extra_items = {
     "Fuse":                                             ExtraItem(lambda world: {IC.progression: 10} if world.options.fuse_replacement_locations.value else {}),
     "Random Fuse Blowout":                              ExtraItem(lambda world: {IC.progression | IC.trap: world.options.fuse_replacement_locations.value - 15}),
     "Crowbar":                                          ExtraItem(lambda world: {(IC.progression if world.options.chicken_sandwiches.value else IC.useful): 1}),
-    "Gas Can":                                          ExtraItem({IC.progression: 1, IC.useful: 18}),
+    "Gas Can":                                          ExtraItem({IC.progression: 1, IC.useful: 9, IC.filler: 9}),
     "Day":                                              ExtraItem(lambda world: {IC.progression: day_item_count(world)} if world.options.day_as_items.value else {}),
 
     "Furfur Altar Leg 1":                               ExtraItem(lambda world: time_sensitive({(IC.progression if furfur_plush_enabled(world) else IC.filler): 1})(world)),
