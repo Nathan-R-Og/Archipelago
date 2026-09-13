@@ -292,7 +292,7 @@ extra_items = {
     "Badge":                                            ExtraItem({IC.filler: 2}),
     "Jacket":                                           ExtraItem({IC.filler: 2}),
     "Compost Bucket":                                   ExtraItem({IC.filler: 2}),
-    "Green Fire Rock":                                  ExtraItem(time_sensitive({IC.filler: 1})),
+    # "Green Fire Rock":                                  ExtraItem(time_sensitive({IC.filler: 1})),
     "Broom":                                            ExtraItem({IC.filler: 2}),
     "Pipebomb":                                         ExtraItem({IC.filler: 1}),
     "Welding Mask":                                     ExtraItem({IC.filler: 2}),
