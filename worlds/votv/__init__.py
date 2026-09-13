@@ -174,7 +174,7 @@ class VOTVWorld(World):
                 "AriralReputationAmount":       self.options.ariral_reputation_amount.value,
                 "DeathLink":                    self.options.death_link.value
             },
-            "Version": [0, 6, 0],
+            "Version": [0, 6, 1],
             "Seed": self.multiworld.seed_name,  # to verify the server's multiworld
             "Slot": self.multiworld.player_name[self.player],  # to connect to server
             "ItemNames": reduce(lambda acc, x: {**acc, x: (acc[x] if x in acc else 0) + 1}, item_names, {}),  # unique names of all the items in our pool
