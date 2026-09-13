@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Callable, NamedTuple
 from BaseClasses import ItemClassification as IC
 
 from ..Options import ATVUpgradesAsItems, ArgemiaPlushes, PhysicalModulesAsItems, UpgradesAsItems, WorldItems
-from ..Utils import day_item_count, furfur_plush_enabled, is_goal_enabled, resolve
+from ..Utils import day_item_count, furfur_plush_enabled, is_goal_enabled, lifecrystal_signal_enabled, resolve
 from ..Types import VOTVGoal
 
 if TYPE_CHECKING:
@@ -187,7 +187,7 @@ extra_items = {
     "Glass Scrap Recipe":                               ExtraItem(recipe({IC.progression: 1})),
     "Plastic Scrap Recipe":                             ExtraItem(recipe({IC.progression: 1})),
     "Progressive Processing Level":                     ExtraItem(upgrade({IC.progression: 3})),
-    "Lifecrystal Signal":                               ExtraItem(lambda world: {IC.progression: 1} if is_goal_enabled(world, VOTVGoal.HELL_ROCK, also=lambda w: w.options.buried_items.value) or any(is_goal_enabled(world, x) for x in {VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}) else {}),
+    "Lifecrystal Signal":                               ExtraItem(lambda world: {IC.progression: 1} if lifecrystal_signal_enabled(world) else {}),
     "Hiking Boots":                                     ExtraItem({IC.progression: 1}),
     "Lighter":                                          ExtraItem({IC.progression: 1}),
     "Cig Pack":                                         ExtraItem({IC.progression: 1}),
@@ -241,7 +241,7 @@ extra_items = {
 
     "Paper Scrap Recipe":                               ExtraItem(recipe({IC.filler: 1})),
     "Wood Scrap Recipe":                                ExtraItem(recipe({IC.filler: 1})),
-    "Chicken Sandwich":                                 ExtraItem(plus({IC.filler: 19}, buried({IC.filler: 1}), time_sensitive({IC.filler: 1}))),
+    "Chicken Sandwich":                                 ExtraItem(lambda world: plus({IC.filler: 19}, buried({IC.filler: 1}), time_sensitive({IC.filler: 1}))(world) if world.options.chicken_sandwiches.value else {}),
     "Rubble Recipe":                                    ExtraItem(recipe({IC.filler: 1})),
     "Air Tablet":                                       ExtraItem(buried({IC.filler: 1})),
     "Fire Tablet":                                      ExtraItem(buried({IC.filler: 1})),

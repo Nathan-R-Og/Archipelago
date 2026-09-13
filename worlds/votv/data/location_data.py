@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Callable, NamedTuple
 from rule_builder.options import OptionFilter
 from rule_builder.rules import CanReachRegion, Has, HasAll, HasAllCounts, HasAny, HasFromList, Rule
 
-from ..Utils import CanGetSignals, DayItemFieldResolver, is_goal_enabled, furfur_plush_enabled
+from ..Utils import CanGetSignals, CanReachPotentialSpawnLocations, DayItemFieldResolver, is_goal_enabled, furfur_plush_enabled, lifecrystal_signal_enabled
 from ..Options import ArgemiaPlushes, DayAsItems, ScrapRecipesAsItems, UpgradesAsItems, WorldItems
 from ..Types import VOTVGoal
 from ..Constants import (
@@ -175,11 +175,11 @@ locations = {
     "Air Tablet":                       LocationInfo("Atop the utility pole closest to TR1", "TR1", rule=Has("Half Hook")),
     "Fire Tablet":                      LocationInfo("In the Lambert Ritual dimension, accessible in the Abandoned Shack at 3:33 AM", "Abandoned Shack", enabled=lambda world: buried(world) and time_sensitive(world), rule=Has("Shovel")),
 
-    "Maxwell":                          LocationInfo("Type maxwell in a console, then listen for the music", "Misc", enabled=funny),
-    "Argemwell":                        LocationInfo("Type argemwell in a console, then listen for the music", "Misc", enabled=funny),
-    "Gnarpwell":                        LocationInfo("Type gnarpwell in a console, then listen for the music", "Misc", enabled=funny),
-    "Eriewell":                         LocationInfo("Type eriewell in a console, then listen for the music", "Misc", enabled=funny),
-    "Thiccfus Plush":                   LocationInfo("Type gooseworx.rufus in a console, then defeat it", "Misc", enabled=funny),
+    "Maxwell":                          LocationInfo("Type maxwell in a console, then listen for the music", "Misc", enabled=funny, rule=CanReachPotentialSpawnLocations()),
+    "Argemwell":                        LocationInfo("Type argemwell in a console, then listen for the music", "Misc", enabled=funny, rule=CanReachPotentialSpawnLocations()),
+    "Gnarpwell":                        LocationInfo("Type gnarpwell in a console, then listen for the music", "Misc", enabled=funny, rule=CanReachPotentialSpawnLocations()),
+    "Eriewell":                         LocationInfo("Type eriewell in a console, then listen for the music", "Misc", enabled=funny, rule=CanReachPotentialSpawnLocations()),
+    "Thiccfus Plush":                   LocationInfo("Type gooseworx.rufus in a console, then defeat it", "Misc", enabled=funny, rule=Has("Gas Can")),
     "Llama Plush":                      LocationInfo("Type llama.saatana in a console, then look for it nearby", "Misc", enabled=funny),
     "Maid Outfit":                      LocationInfo("Buried near the light post on the last turn to TR3", "Misc", enabled=lambda world: funny(world) and buried(world), rule=Has("Shovel")),
 
@@ -244,7 +244,7 @@ locations = {
     "Radioactive Capsule Skull":        LocationInfo("", "TR2", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH})),
     "Cave Entrance Skull":              LocationInfo("", "Cave", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH})),
     "Stonehenge Skull":                 LocationInfo("", "Stonehenge", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}), region="Stonehenge"),
-    "Rozital Ship Skull":               LocationInfo("", "Misc", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}), rule=HasAll("Lifecrystal Signal", "Shovel") & CanGetSignals(processing=True) & Has("Progressive Processing Level", 3, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True)),
+    "Rozital Ship Skull":               LocationInfo("", "Misc", enabled=goal({VOTVGoal.HELL_ROCK, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=lambda w: lifecrystal_signal_enabled(w)), rule=HasAll("Lifecrystal Signal", "Shovel") & CanGetSignals(processing=True) & Has("Progressive Processing Level", 3, options=[OptionFilter(UpgradesAsItems, UpgradesAsItems.option_useful, "ge")], filtered_resolution=True)),
 
     "Fire Rune":                        LocationInfo("Explode a rock, violently", "Misc", enabled=goal({VOTVGoal.LAMBERT_PLUSH}), rule=Has("Half Hook", count=2)),
     "Earth Rune":                       LocationInfo("Bury a rock in the big log near TR2 and dig it up between 0:00 and 1:00", "Misc", enabled=goal({VOTVGoal.LAMBERT_PLUSH}, also=lambda world: buried(world) and time_sensitive(world)), rule=Has("Shovel")),
@@ -258,7 +258,7 @@ locations = {
     "Green Argemia Plush":              LocationInfo("At the top of the mountain in the bottom left, out of fence", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgb)), rule=CanReachRegion("Garage") & Has("Gas Can") | Has("Half Hook") | Has("Hiking Boots")),
     "Yellow Argemia Plush":             LocationInfo("Place a shrimp pack at each corner of the map and in the basement, then look up and away after midnight", "Misc", complex=True, enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Alpha Stairs", rule=Has("Shrimp Pack", 16) & CanReachRegion("Staff Room") & CanReachRegion("Restricted Area")),
     "Cyan Argemia Plush":               LocationInfo("Put 12 shrimp packs in the emergency shower, and explode them", "Misc", complex=True, enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), region="Signal Lab", rule=Has("Shrimp Pack", 16) & CanReachRegion("Staff Room")),  # 17, -1 since we assume the players have the fridge Shrimp Pack
-    "Magenta Argemia Plush":            LocationInfo("At the Rozital Ship after the lifecrystal signal is processed", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=argemia_plush(ArgemiaPlushes.option_rgbycm)), rule=Has("Lifecrystal Signal") & CanGetSignals(processing=False)),
+    "Magenta Argemia Plush":            LocationInfo("At the Rozital Ship after the lifecrystal signal is processed", "Misc", enabled=goal({VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH}, also=lambda w: lifecrystal_signal_enabled(w)), rule=Has("Lifecrystal Signal") & CanGetSignals(processing=False)),
     "Nuclear Pink Argemia Plush":       LocationInfo("Near the radio tower at 35.23/-37.24, invisible until bumped", "Misc", enabled=argemia_plush(ArgemiaPlushes.option_all)),
     "Nuclear Yellow Argemia Plush":     LocationInfo("At -634.14/181.37", "Misc", enabled=lambda world: buried(world) and argemia_plush(ArgemiaPlushes.option_all)(world), rule=HasAll("Shovel", "Metal Detector")),
     "Nuclear Orange Argemia Plush":     LocationInfo("Next to the barrier at 872.25/-793.0, high in the sky", "Misc", enabled=argemia_plush(ArgemiaPlushes.option_all), rule=Has("Half Hook")),

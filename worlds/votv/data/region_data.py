@@ -24,7 +24,7 @@ def fence_entrance(connected_region: str, also: Rule = True_(), one_way: bool = 
     return EntranceInfo(
         connected_region,
         connected_region,
-        access_rule=also & Has(f"Half Hook", options=[OptionFilter(FenceClimbing, True)], filtered_resolution=True),
+        access_rule=also & Has(f"Half Hook", options=[OptionFilter(FenceClimbing, False)], filtered_resolution=True),
         two_way=not one_way
     )
 
