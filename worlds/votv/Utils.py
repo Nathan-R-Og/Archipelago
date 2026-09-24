@@ -3,9 +3,9 @@ from typing import Any, Callable, TYPE_CHECKING, TypeVar, override
 
 from rule_builder.field_resolvers import FieldResolver
 from rule_builder.options import OptionFilter
-from rule_builder.rules import And, CanReachRegion, Has, HasAll, Rule
+from rule_builder.rules import And, CanReachRegion, Has, HasAll, HasAny, Rule
 from worlds.AutoWorld import World
-from worlds.votv.Options import ArgemiaPlushes, BreakersAsItems
+from worlds.votv.Options import ArgemiaPlushes, BreakersAsItems, WorldItems
 
 from .Types import VOTVGoal
 from .Constants import max_days
@@ -34,7 +34,7 @@ def is_goal_enabled(world: "VOTVWorld", goal: VOTVGoal, also: Callable[["VOTVWor
     ) and also(world)
 
 def furfur_plush_enabled(world: "VOTVWorld"):
-    return bool(world.options.buried_items.value and world.options.time_sensitive.value)
+    return bool(world.options.buried_items.value and world.options.time_sensitive.value and world.options.world_items.value >= WorldItems.option_extreme)
 
 def day_item_count(world: "VOTVWorld"):
     return max(
@@ -69,5 +69,11 @@ class CanGetSignals(Rule, game="Voices of the Void"):
 @dataclass
 class CanReachPotentialSpawnLocations(Rule, game="Voices of the Void"):
     def _instantiate(self, world: World) -> Rule.Resolved:
-        rule = And(Has("Hiking Boots") | Has("Half Hook"), *(CanReachRegion(r) for r in ("Outside", "New Trees Area", "Restricted Area", "Stonehenge", "Green Hatch", "Abandoned Shack")))
+        rule = And(Has("Hiking Boots", options=[OptionFilter(WorldItems, WorldItems.option_base, "ge")], filtered_resolution=True) | HasAny("Half Hook", "Hook"), *(CanReachRegion(r) for r in ("Outside", "New Trees Area", "Restricted Area", "Stonehenge", "Green Hatch", "Abandoned Shack")))
+        return rule.resolve(world)
+
+@dataclass
+class HasShovel(Rule, game="Voices of the Void"):
+    def _instantiate(self, world: World) -> Rule.Resolved:
+        rule = Has("Shovel", options=[OptionFilter(WorldItems, WorldItems.option_base, "ge")], filtered_resolution=True)
         return rule.resolve(world)

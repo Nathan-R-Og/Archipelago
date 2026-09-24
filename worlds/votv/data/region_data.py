@@ -1,8 +1,8 @@
 from typing import NamedTuple
 
 from rule_builder.options import OptionFilter
-from rule_builder.rules import CanReachRegion, Has, HasAll, Rule, True_
-from worlds.votv.Options import DayAsItems, DoorsAsItems, FenceClimbing
+from rule_builder.rules import CanReachRegion, Has, HasAll, HasAny, Rule, True_
+from worlds.votv.Options import DayAsItems, DoorsAsItems, FenceClimbing, WorldItems
 from worlds.votv.Utils import DayItemFieldResolver
 
 class EntranceInfo(NamedTuple):
@@ -24,7 +24,7 @@ def fence_entrance(connected_region: str, also: Rule = True_(), one_way: bool = 
     return EntranceInfo(
         connected_region,
         connected_region,
-        access_rule=also & Has(f"Half Hook", options=[OptionFilter(FenceClimbing, False)], filtered_resolution=True),
+        access_rule=also & HasAny("Half Hook", "Hook", options=[OptionFilter(FenceClimbing, False)], filtered_resolution=True),
         two_way=not one_way
     )
 
@@ -34,11 +34,11 @@ class RegionInfo(NamedTuple):
 regions = {
     "Outside": RegionInfo([
         EntranceInfo("Alpha Base Entrance", "Alpha Base", two_way=True),
-        door_entrance("Bunker", also=Has("Bunker Keycard")),
+        door_entrance("Bunker", also=Has("Bunker Keycard", options=[OptionFilter(WorldItems, WorldItems.option_base, "ge")], filtered_resolution=True)),
         door_entrance("TR1 Room"),
         door_entrance("TR2 Room"),
         door_entrance("TR3 Room"),
-        EntranceInfo("Climb up", "Alpha Roof", access_rule=Has("Half Hook")),
+        EntranceInfo("Climb up", "Alpha Roof", access_rule=HasAny("Half Hook", "Hook")),
         EntranceInfo("Dive under", "Lake", access_rule=HasAll("Scuba Mask", "Scuba Mask Tank")),
         EntranceInfo("Open the cave", "Cave", access_rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs") | Has("Day", DayItemFieldResolver(3), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True)),
         fence_entrance("New Trees Area"),
@@ -73,7 +73,7 @@ regions = {
     "Utility Closet": RegionInfo([]),
     "Garage": RegionInfo([
         door_entrance("Admin Room"),
-        EntranceInfo("Climb out", "Alpha Roof", access_rule=Has("Half Hook")),
+        EntranceInfo("Climb out", "Alpha Roof", access_rule=HasAny("Half Hook", "Hook")),
         EntranceInfo("Elevator", "Storage Room", two_way=True),
         EntranceInfo("Garage door", "Outside")
     ]),

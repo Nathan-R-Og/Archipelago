@@ -164,7 +164,6 @@ class VOTVWorld(World):
                 "EnableCraftedCapsule":         self.options.enable_crafted_capsule.value,
                 "DayAsItems":                   self.options.day_as_items.value,
                 "SurviveDay":                   self.options.survive_day.value,
-                "ChickenSandwiches":            self.options.chicken_sandwiches.value,
                 "BuriedItems":                  self.options.buried_items.value,
                 "ArgemiaPlushes":               self.options.argemia_plushes.value,
                 "TrapChance":                   self.options.trap_chance.value,

@@ -125,20 +125,22 @@ class ATVUpgradesAsItems(Choice):
 
 class WorldItems(Choice):
     """
-    Determines what world items are shuffled.
+    Determines what world items are shuffled. Overall, only items that are unique, scarce, or noteworthy will be shuffled. Junk is left untouched.
+    None: No world items
+    Base: World items typically found in a regular blind playthrough, in the open. Assumes exploration of all obvious landmarks
+    Hidden: World items that are a bit more out of the way but can still be stumbled upon, either because of closeness or hints
+    Extreme: World items that include very obscure items that will most likely be found via the wiki, and not in-game info
     """
     display_name = "World Items"
     option_none = 0
-    """No world items"""
-    option_main = 1
-    """World items that are unique, useful, or otherwise scarce"""
-    option_all = 2
-    """All items found in the world"""
-    default = 1
+    option_base = 1
+    option_hidden = 2
+    option_extreme = 3
+    default = 2
 
 class DoorsAsItems(DefaultOffToggle):
     """
-    Determines if doors start jammed and have to be found.
+    Determines if doors start jammed until a certain item is found.
     """
     display_name = "Doors As Items"
 
@@ -170,8 +172,7 @@ class AriralReputationAmount(Range):
 
 class BonusPointsChance(Range):
     """
-    Determines the chance for any junk item to become Bonus Points.
-    Set it to 0 for logic to attempt placing all filler items.
+    Determines the chance for any junk (not trap) item to become Bonus Points.
     If there are more locations than items, remaining slots will always be filled with Bonus Points.
     """
     display_name = "Bonus Points Chance"
@@ -191,8 +192,6 @@ class BonusPointsAmount(Range):
 class SurviveDayLocations(Range):
     """
     Determines the maximum day to create "Survive Day N" location for.
-    0 will generate none.
-    NOTE: If the objective is Survive, the goal day is used instead.
     """
     display_name = "Survive Day Locations"
     range_start = 0
@@ -202,7 +201,6 @@ class SurviveDayLocations(Range):
 class SignalLocations(Range):
     """
     Determines the number of "Sell Level N Signal" locations to create, one for each signal level.
-    0 will generate none.
     """
     display_name = "Signal Locations"
     range_start = 0
@@ -219,7 +217,6 @@ class BackwardsSignalLevels(DefaultOnToggle):
 class DailyTaskLocations(Range):
     """
     Determines the number of "Daily Task Done" locations to create.
-    0 will generate none.
     """
     display_name = "Daily Task Locations"
     range_start = 0
@@ -229,7 +226,6 @@ class DailyTaskLocations(Range):
 class FuseReplacementLocations(Range):
     """
     Determines the number of "Replace Fuse" locations to create.
-    0 will generate none.
     """
     display_name = "Replace Fuse Locations"
     range_start = 0
@@ -239,7 +235,6 @@ class FuseReplacementLocations(Range):
 class ServerRepairLocations(Range):
     """
     Determines the number of "Repair Server" locations to create.
-    0 will generate none.
     """
     display_name = "Repair Server Locations"
     range_start = 0
@@ -249,7 +244,6 @@ class ServerRepairLocations(Range):
 class TransformerRepairLocations(Range):
     """
     Determines the number of "Repair Transformer" locations to create.
-    0 will generate none.
     """
     display_name = "Repair Transformer Locations"
     range_start = 0
@@ -259,7 +253,6 @@ class TransformerRepairLocations(Range):
 class TrashBagsLocations(Range):
     """
     Determines the number of "Sell 24 Full Trash Bags" locations to create.
-    0 will generate none.
     """
     display_name = "Trash Bags Locations"
     range_start = 0
@@ -290,22 +283,17 @@ class RockCandles(DefaultOffToggle):
 #     """
 #     display_name = "Shop Items As Locations"
 
-class ChickenSandwiches(DefaultOnToggle):
-    """
-    Determines if the chicken sandwiches are included as locations.
-    """
-    display_name = "Chicken Sandwiches As Locations"
-
 class BuriedItems(DefaultOnToggle):
     """
     Determines if items that require digging out are included as locations.
-    Locations required by the objective are always enabled (Example: the ball joints for Kerfur-Omega)
+    Locations required by the objective are always enabled. (Example: the ball joints for Kerfur-Omega)
     """
     display_name = "Buried Items As Locations"
 
 class TimeSensitive(DefaultOffToggle):
     """
     Determines if locations that are in-game-time-sensitive are enabled.
+    Locations required by the objective are always enabled. (Example: the ball joints for Kerfur-Omega)
     """
     display_name = "Time Sensitive Locations"
 
@@ -367,7 +355,6 @@ class GreenCabinetEnabled(DefaultOnToggle):
 class TrapChance(Range):
     """
     Determines the chance for any junk item to become a trap.
-    Set it to 0 for no traps.
     """
     display_name = "Trap Chance"
     range_start = 0
@@ -386,7 +373,7 @@ class VOTVOptions(PerGameCommonOptions):
     upgrades_as_items:              UpgradesAsItems
     physical_modules_as_items:      PhysicalModulesAsItems
     atv_upgrades_as_items:          ATVUpgradesAsItems
-    # world_items:                    WorldItems
+    world_items:                    WorldItems
     doors_as_items:                 DoorsAsItems
     breakers_as_items:              BreakersAsItems
     ariral_reputation_items:        AriralReputationItems
@@ -405,7 +392,6 @@ class VOTVOptions(PerGameCommonOptions):
     cooking_tasks:                  CookingTasks
     rock_candles:                   RockCandles
     # shop_items:                     ShopItems
-    chicken_sandwiches:             ChickenSandwiches
     buried_items:                   BuriedItems
     time_sensitive:                 TimeSensitive
     funny_setting:                  FunnySetting
@@ -434,7 +420,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         UpgradesAsItems,
         PhysicalModulesAsItems,
         ATVUpgradesAsItems,
-        # WorldItems,
+        WorldItems,
         DoorsAsItems,
         BreakersAsItems,
         AriralReputationItems,
@@ -453,7 +439,6 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         CookingTasks,
         RockCandles,
         # ShopItems,
-        ChickenSandwiches,
         BuriedItems,
         TimeSensitive,
         FunnySetting,
