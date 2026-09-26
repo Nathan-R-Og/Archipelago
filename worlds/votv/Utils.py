@@ -27,8 +27,8 @@ def is_goal_enabled(world: "VOTVWorld", goal: VOTVGoal, also: Callable[["VOTVWor
     return bool(
         goal == VOTVGoal.KERFUR_OMEGA and world.options.kerfur_omega_enabled.value
         or goal == VOTVGoal.HELL_ROCK and world.options.hell_rock_enabled.value
-        or goal == VOTVGoal.WHITE_ARGEMIA_PLUSH and world.options.argemia_plushes.value >= ArgemiaPlushes.option_rgbycm
-        or goal == VOTVGoal.BLACK_ARGEMIA_PLUSH and world.options.hell_rock_enabled.value and world.options.argemia_plushes.value >= ArgemiaPlushes.option_rgbycm
+        or goal == VOTVGoal.WHITE_ARGEMIA_PLUSH
+        or goal == VOTVGoal.BLACK_ARGEMIA_PLUSH and world.options.hell_rock_enabled.value
         or goal == VOTVGoal.LAMBERT_PLUSH and world.options.lambert_plush_enabled.value
         or goal == VOTVGoal.GREEN_CABINET and world.options.green_cabinet_enabled.value
     ) and also(world)
@@ -45,7 +45,7 @@ def day_item_count(world: "VOTVWorld"):
     )
 
 def lifecrystal_signal_enabled(world: "VOTVWorld"):
-    return is_goal_enabled(world, VOTVGoal.HELL_ROCK, also=lambda w: bool(w.options.buried_items.value)) or any(is_goal_enabled(world, x) for x in {VOTVGoal.WHITE_ARGEMIA_PLUSH, VOTVGoal.BLACK_ARGEMIA_PLUSH})
+    return is_goal_enabled(world, VOTVGoal.HELL_ROCK, also=lambda w: bool(w.options.buried_items.value)) or is_goal_enabled(world, VOTVGoal.WHITE_ARGEMIA_PLUSH) or world.options.argemia_plushes.value >= ArgemiaPlushes.option_rgbycm
 
 @dataclass(frozen=True)
 class DayItemFieldResolver(FieldResolver, game="Voices of the Void"):

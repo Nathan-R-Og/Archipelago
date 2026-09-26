@@ -247,7 +247,7 @@ extra_items = {
     "Chicken Sandwich":                                 ExtraItem(plus({IC.filler: 7}, world_item(plus({IC.filler: 12}, buried({IC.filler: 1}), time_sensitive({IC.filler: 1})), WorldItems.option_hidden))),
     "Rubble Recipe":                                    ExtraItem(recipe({IC.filler: 1})),
     "Air Tablet":                                       ExtraItem(world_item({IC.filler: 1}, WorldItems.option_extreme)),
-    "Fire Tablet":                                      ExtraItem(world_item(buried({IC.filler: 1}), WorldItems.option_extreme)),
+    "Fire Tablet":                                      ExtraItem(world_item(time_sensitive(buried({IC.filler: 1})), WorldItems.option_extreme)),
     "Earth Tablet":                                     ExtraItem(world_item(buried({IC.filler: 1}), WorldItems.option_extreme)),
     "Water Tablet":                                     ExtraItem(world_item(buried({IC.filler: 1}), WorldItems.option_extreme)),
     "Progressive Radar History":                        ExtraItem(upgrade({IC.filler: 3})),
@@ -321,5 +321,7 @@ extra_items = {
     "Points Fine Trap":                                 ExtraItem({IC.trap: 1}),
     "Flat Tire Trap":                                   ExtraItem({IC.trap: 1}),
     "Dead Flashlight Trap":                             ExtraItem({IC.trap: 1}),
+    "Black Fog Trap":                                   ExtraItem({IC.trap: 1}),
+    "Alien Cutout Trap":                                ExtraItem(funny({IC.trap: 1})),
     "Negative Reputation Trap":                         ExtraItem(lambda world: {IC.trap: 1} if world.options.ariral_reputation_items.value else {})
 }
