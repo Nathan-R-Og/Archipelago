@@ -66,11 +66,18 @@ class DeathLink(DefaultOffToggle):
     """
     display_name = "Death Link"
 
-class FenceClimbing(DefaultOnToggle):
+class ClimbingAccessibility(Choice):
     """
-    Determines if the logic assumes the player is able to climb fences, or requires a hook to do so.
+    Determines if the logic assumes the player is able to use climbing to access locations, or requires a hook to do so.
+    None: Assumes climbing will never be used
+    Fences: Assumes climbing will only be used for wire fences
+    Full: Assumes climbing will be used wherever possible (Alpha roof, Village church)
     """
-    display_name="Fence Climbing"
+    display_name="Climbing Accessibility"
+    option_none = 0
+    option_fences = 1
+    option_full = 2
+    default = 1
 
 class DayAsItems(DefaultOffToggle):
     """
@@ -367,7 +374,7 @@ class VOTVOptions(PerGameCommonOptions):
     enable_crafted_capsule:         EnableCraftedCapsule
     survive_day:                    SurviveDay
     death_link:                     DeathLink
-    fence_climbing:                 FenceClimbing
+    climbin_accessibility:          ClimbingAccessibility
     day_as_items:                   DayAsItems
     scrap_recipes_as_items:         ScrapRecipesAsItems
     upgrades_as_items:              UpgradesAsItems
@@ -414,7 +421,7 @@ votv_option_groups: Dict[str, List[type[Option]]] = {
         DeathLink
     ],
     "Item & Location Options": [
-        FenceClimbing,
+        ClimbingAccessibility,
         DayAsItems,
         ScrapRecipesAsItems,
         UpgradesAsItems,

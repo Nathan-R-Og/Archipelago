@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 from rule_builder.options import OptionFilter
 from rule_builder.rules import CanReachRegion, Has, HasAll, HasAny, Rule, True_
-from worlds.votv.Options import DayAsItems, DoorsAsItems, FenceClimbing, WorldItems
+from worlds.votv.Options import DayAsItems, DoorsAsItems, ClimbingAccessibility, WorldItems
 from worlds.votv.Utils import DayItemFieldResolver
 
 class EntranceInfo(NamedTuple):
@@ -16,7 +16,7 @@ def door_entrance(connected_region: str, item: str = "", also: Rule = True_(), o
     return EntranceInfo(
         connected_region,
         connected_region,
-        access_rule=also & Has(f"{connected_region} Entrance" if len(item) == 0 else item, options=[OptionFilter(DoorsAsItems, True)], filtered_resolution=True),
+        access_rule=also & (Has(f"{connected_region} Entrance" if len(item) == 0 else item) | OptionFilter(DoorsAsItems, False)),
         two_way=not one_way
     )
 
@@ -24,7 +24,7 @@ def fence_entrance(connected_region: str, also: Rule = True_(), one_way: bool = 
     return EntranceInfo(
         connected_region,
         connected_region,
-        access_rule=also & HasAny("Half Hook", "Hook", options=[OptionFilter(FenceClimbing, False)], filtered_resolution=True),
+        access_rule=also & (HasAny("Half Hook", "Hook") | OptionFilter(ClimbingAccessibility, ClimbingAccessibility.option_fences, "ge")),
         two_way=not one_way
     )
 
@@ -38,9 +38,9 @@ regions = {
         door_entrance("TR1 Room"),
         door_entrance("TR2 Room"),
         door_entrance("TR3 Room"),
-        EntranceInfo("Climb up", "Alpha Roof", access_rule=HasAny("Half Hook", "Hook")),
+        EntranceInfo("Climb up", "Alpha Roof", access_rule=HasAny("Half Hook", "Hook") | OptionFilter(ClimbingAccessibility, ClimbingAccessibility.option_full)),
         EntranceInfo("Dive under", "Lake", access_rule=HasAll("Scuba Mask", "Scuba Mask Tank")),
-        EntranceInfo("Open the cave", "Cave", access_rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs") | Has("Day", DayItemFieldResolver(3), options=[OptionFilter(DayAsItems, True)], filtered_resolution=True)),
+        EntranceInfo("Open the cave", "Cave", access_rule=CanReachRegion("Signal Lab") & CanReachRegion("Alpha Stairs") | Has("Day", DayItemFieldResolver(3)) | OptionFilter(DayAsItems, False)),
         fence_entrance("New Trees Area"),
         fence_entrance("Restricted Area"),
         fence_entrance("Stonehenge"),
@@ -73,7 +73,7 @@ regions = {
     "Utility Closet": RegionInfo([]),
     "Garage": RegionInfo([
         door_entrance("Admin Room"),
-        EntranceInfo("Climb out", "Alpha Roof", access_rule=HasAny("Half Hook", "Hook")),
+        EntranceInfo("Climb out", "Alpha Roof", access_rule=HasAny("Half Hook", "Hook") | OptionFilter(ClimbingAccessibility, ClimbingAccessibility.option_full)),
         EntranceInfo("Elevator", "Storage Room", two_way=True),
         EntranceInfo("Garage door", "Outside")
     ]),

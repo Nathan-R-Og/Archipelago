@@ -181,7 +181,7 @@ extra_items = {
 
     "Half Hook":                                        ExtraItem(world_item({IC.progression: 2}, WorldItems.option_hidden)),
     "Hook":                                             ExtraItem(lambda world: {IC.progression: 1} if world.options.world_items.value <= WorldItems.option_base else {}),
-    "Shovel":                                           ExtraItem(plus(world_item({IC.progression: 1, IC.useful: 3}), world_item({IC.useful: 1}, WorldItems.option_hidden))),
+    "Shovel":                                           ExtraItem(plus(world_item({IC.progression: 1, IC.useful: 2}), world_item({IC.useful: 1}, WorldItems.option_hidden))),
     "Bunker Keycard":                                   ExtraItem(world_item({IC.progression: 1})),
     "Scuba Mask":                                       ExtraItem({IC.progression: 1}),
     "Scuba Mask Tank":                                  ExtraItem({IC.progression: 1}),

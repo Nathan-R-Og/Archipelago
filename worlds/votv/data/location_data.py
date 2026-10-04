@@ -4,7 +4,7 @@ from rule_builder.options import OptionFilter
 from rule_builder.rules import CanReachRegion, Has, HasAll, HasAllCounts, HasAny, HasFromList, Rule
 
 from ..Utils import CanGetSignals, CanReachPotentialSpawnLocations, DayItemFieldResolver, HasShovel, is_goal_enabled, furfur_plush_enabled, lifecrystal_signal_enabled
-from ..Options import ArgemiaPlushes, DayAsItems, ScrapRecipesAsItems, UpgradesAsItems, WorldItems
+from ..Options import ArgemiaPlushes, ClimbingAccessibility, DayAsItems, ScrapRecipesAsItems, UpgradesAsItems, WorldItems
 from ..Types import VOTVGoal
 from ..Constants import (
     max_days,
@@ -154,7 +154,7 @@ locations = {
     "Ventilation Unit Sandwich":        LocationInfo("", "Alpha Base", enabled=world_item(), region="Alpha Roof"),
     "Radar Dome Sandwich":              LocationInfo("", "Alpha Base", enabled=world_item(WorldItems.option_hidden), region="Alpha Roof", rule=HasAny("Half Hook", "Hook")),
     "Radio Tower Pole Sandwich":        LocationInfo("", "Alpha Base", enabled=world_item(WorldItems.option_extreme), rule=HasAny("Half Hook", "Hook")),
-    "River Sandwich":                   LocationInfo("Under the bridge next to Alpha Base", "Alpha Base", enabled=world_item(WorldItems.option_hidden)),
+    "River Sandwich":                   LocationInfo("Under the bridge next to Alpha Base", "Alpha Base", enabled=world_item(WorldItems.option_extreme)),
     "TR2 Sandwich":                     LocationInfo("On the roof, behind the high voltage box", "TR2", enabled=world_item(WorldItems.option_hidden)),
     "Lake Log Sandwich":                LocationInfo("Under the rocks", "Lake", enabled=world_item(WorldItems.option_hidden)),
     "Buried Sandwich":                  LocationInfo("At 157.0/-584.3, near the danger sign", "Misc", enabled=_and(buried, world_item(WorldItems.option_extreme)), rule=HasShovel() & Has("Metal Detector")),
@@ -229,9 +229,9 @@ locations = {
     "TR1 Gas Welder 2":                 LocationInfo("", "TR1", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=world_item())),
     "Hole Gas Welder":                  LocationInfo("", "The Hole", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=world_item())),
 
-    "Bunker Keycard":                   LocationInfo("Hookable from the slot at the back of the bunker", "Alpha Base", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=world_item()), rule=Has("Bunker Keycard") & CanReachRegion("Bunker") | HasAny("Half Hook", "Hook")),
+    "Bunker Keycard":                   LocationInfo("Hookable from the slot at the back of the bunker", "Alpha Base", enabled=world_item(), rule=Has("Bunker Keycard") & CanReachRegion("Bunker") | HasAny("Half Hook", "Hook")),
+    "Kerfur-Omega Documents Binder":    LocationInfo("", "Alpha Base", enabled=world_item(), region="Bunker"),
     "Kerfur-Omega Complete Manual":     LocationInfo("", "Alpha Base", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=world_item(WorldItems.option_hidden)), region="Bunker"),
-    "Kerfur-Omega Documents Binder":    LocationInfo("", "Alpha Base", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=world_item()), region="Bunker"),
 
     "Pickaxe":                          LocationInfo("", "Lake", enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=world_item()), region="Lake"),
     "Omega AI Module":                  LocationInfo("", "Lake", complex=True, enabled=goal({VOTVGoal.KERFUR_OMEGA}, also=world_item()), region="Lake", rule=HasAny("Half Hook", "Hook", "Hacksaw")),
@@ -272,7 +272,7 @@ locations = {
     "Hole Tile":                        LocationInfo("Behind the rocks", "The Hole", enabled=goal({VOTVGoal.GREEN_CABINET}, also=world_item(WorldItems.option_hidden))),
     "CR3 Tile":                         LocationInfo("On the second-to-last floor", "Misc", enabled=goal({VOTVGoal.GREEN_CABINET}, also=world_item(WorldItems.option_hidden))),
     "Sierra Tile":                      LocationInfo("On the right of the server room", "Misc", enabled=goal({VOTVGoal.GREEN_CABINET}, also=world_item(WorldItems.option_hidden))),
-    "Stolas Church Tile":               LocationInfo("At the very top, in the empty window", "Village", enabled=goal({VOTVGoal.GREEN_CABINET}, also=world_item(WorldItems.option_extreme)), rule=HasAny("Half Hook", "Hook")),
+    "Stolas Church Tile":               LocationInfo("At the very top, in the empty window", "Village", enabled=goal({VOTVGoal.GREEN_CABINET}, also=world_item(WorldItems.option_extreme)), rule=HasAny("Half Hook", "Hook") | OptionFilter(ClimbingAccessibility, ClimbingAccessibility.option_full)),
     "Green Cabinet Tile":               LocationInfo("", "Green Cabinet", enabled=goal({VOTVGoal.GREEN_CABINET}, also=world_item())),
 
     "Kerfur-Omega":                     LocationInfo("", "Alpha Base", enabled=goal({VOTVGoal.KERFUR_OMEGA}, final=True), rule=(
