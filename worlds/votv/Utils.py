@@ -45,7 +45,7 @@ def day_item_count(world: "VOTVWorld"):
     )
 
 def lifecrystal_signal_enabled(world: "VOTVWorld"):
-    return is_goal_enabled(world, VOTVGoal.HELL_ROCK, also=lambda w: bool(w.options.buried_items.value)) or world.options.argemia_plushes.value >= ArgemiaPlushes.option_rgbycm
+    return is_goal_enabled(world, VOTVGoal.HELL_ROCK, also=lambda w: bool(w.options.buried_items.value)) or is_goal_enabled(world, VOTVGoal.WHITE_ARGEMIA_PLUSH, also=lambda w: w.options.argemia_plushes.value >= ArgemiaPlushes.option_rgbycm)
 
 @dataclass(frozen=True)
 class DayItemFieldResolver(FieldResolver, game="Voices of the Void"):

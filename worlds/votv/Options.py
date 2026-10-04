@@ -1,8 +1,7 @@
 from typing import List, Dict
 from dataclasses import dataclass
 from worlds.AutoWorld import PerGameCommonOptions
-from Options import Choice, DefaultOnToggle, Option, OptionGroup, Range
-from worlds.ladx.Options import DefaultOffToggle
+from Options import Choice, DefaultOnToggle, Option, OptionGroup, Range, Toggle
 
 from .Types import VOTVGoal
 from .Constants import (
@@ -14,6 +13,8 @@ from .Constants import (
     max_transformer_repair_locations,
     max_trash_cleaning_locations
 )
+
+DefaultOffToggle = Toggle
 
 # If youve ever gone to an options page and seen how sometimes options are grouped
 # This is that
