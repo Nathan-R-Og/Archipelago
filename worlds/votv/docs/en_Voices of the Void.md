@@ -12,10 +12,11 @@ Additional locations include game tasks (repairing installations, doing your dai
 and ritual-based items (Argemia plushes, Monique plush, ...).
 
 If you need help figuring out where everything is, you can consult the additional info on hints, or look at an interactive map like
-[this one](https://questwalker.github.io/votv-map/). A Digital Map is included in the randomized items.
+[this one](https://questwalker.github.io/votv-map/).
 
-Several options will control which of these items will be added to the randomization. Those options include buried items, items related
-to each of the objective (skulls, tiles, Kerfur-Omega parts), items that are sensitive to the in-game-time (being somewhere at 3:33
+Several options will control which of these items will be added to the randomization. The main one, World Items, controls all the
+items that can found in the world based on how easy it is to find them. Other options include buried items, items related to
+each of the objective (skulls, tiles, Kerfur-Omega parts), items that are sensitive to the in-game-time (being somewhere at 3:33
 for example), different task groups and amounts, and upgrades (global, physical modules, and ATV upgrades).
 
 You can also replace some filler items with Bonus Points, which instantly gives you the amount of points specified in the options.
@@ -31,8 +32,8 @@ When you receive an item in-game, you will see a hint indicating that your item 
 are waiting and what the next item is. To claim the item, simply press F9, and it will appear in your inventory if possible, otherwise at
 your position. A hint will indicate to you what you received and from whom.
 
-Certain items (like progressive upgrades and traps) will automatically be redeemed as soon as they become the next item. This means that
-you won't need to press F9 for these items.
+Certain items (like progressive upgrades and traps) will automatically be redeemed as soon as they are received, or as soon as they become
+the next item in async runs. This means that you won't need to press F9 for these items.
 
 Your progress within the item queue is stored within the save slot. If you have to rollback for any reason (most likely, death), your
 progress at the time of the last save will be used. This does mean that, when you come back, you will have access to items you technically
